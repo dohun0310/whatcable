@@ -100,6 +100,10 @@ fi
 # Build the widget as a universal binary with signing disabled.
 # Version constants are passed via xcodebuild overrides so project.yml
 # doesn't need to stay in sync with smoke-test.sh.
+WIDGET_SWIFT_FLAGS="SWIFT_ACTIVE_COMPILATION_CONDITIONS=\$(inherited)"
+if [[ "${WHATCABLE_PRO:-}" == "1" ]]; then
+    WIDGET_SWIFT_FLAGS="SWIFT_ACTIVE_COMPILATION_CONDITIONS=\$(inherited) WHATCABLE_PRO"
+fi
 xcodebuild build -project WhatCableWidget.xcodeproj -scheme WhatCableWidget \
     -configuration Release \
     -destination 'platform=macOS' \
@@ -107,6 +111,7 @@ xcodebuild build -project WhatCableWidget.xcodeproj -scheme WhatCableWidget \
     ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO \
     MARKETING_VERSION="${VERSION}" \
     CURRENT_PROJECT_VERSION="${BUILD_NUMBER}" \
+    "${WIDGET_SWIFT_FLAGS}" \
     -quiet
 
 # Copy the built .appex into the app bundle's PlugIns directory.
