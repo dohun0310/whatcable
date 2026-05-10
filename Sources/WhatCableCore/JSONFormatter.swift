@@ -99,7 +99,8 @@ private struct PortDTO: Codable {
         self.transports = TransportsDTO(
             supported: port.transportsSupported,
             active: port.transportsActive,
-            provisioned: port.transportsProvisioned
+            provisioned: port.transportsProvisioned,
+            displayPortLanes: port.dpLaneConfig?.label
         )
 
         self.powerSources = sources.map { PowerSourceDTO(source: $0) }
@@ -123,6 +124,7 @@ private struct TransportsDTO: Codable {
     let supported: [String]
     let active: [String]
     let provisioned: [String]
+    let displayPortLanes: String?
 }
 
 private struct PowerSourceDTO: Codable {
@@ -233,6 +235,7 @@ private struct DeviceDTO: Codable {
     let vendorID: Int
     let vendorName: String?
     let productID: Int
+    let pdRevision: String?
 
     init(identity: PDIdentity) {
         let header = identity.idHeader
@@ -242,6 +245,7 @@ private struct DeviceDTO: Codable {
         self.vendorID = identity.vendorID
         self.vendorName = VendorDB.name(for: identity.vendorID)
         self.productID = identity.productID
+        self.pdRevision = identity.pdRevisionLabel
     }
 }
 

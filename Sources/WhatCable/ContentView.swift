@@ -1,6 +1,9 @@
 import SwiftUI
 import WhatCableCore
 import WhatCableDarwinBackend
+#if WHATCABLE_PRO
+import WhatCableProFeatures
+#endif
 
 // MARK: - Font scaling environment
 
@@ -75,9 +78,7 @@ struct ContentView: View {
     @StateObject private var tbWatcher = ThunderboltWatcher()
     @EnvironmentObject private var refresh: RefreshSignal
     @ObservedObject private var settings = AppSettings.shared
-    #if !WHATCABLE_MAS
     @ObservedObject private var updates = UpdateChecker.shared
-    #endif
     @State private var portRefreshTask: Task<Void, Never>?
     @State private var portPollTask: Task<Void, Never>?
 
@@ -166,11 +167,9 @@ struct ContentView: View {
     private var mainContent: some View {
         VStack(spacing: 0) {
             header
-            #if !WHATCABLE_MAS
             if let update = updates.available {
                 UpdateBanner(update: update)
             }
-            #endif
             Divider()
             let visiblePorts = settings.hideEmptyPorts
                 ? portWatcher.ports.filter { isPortLive($0) }
@@ -332,7 +331,6 @@ struct ContentView: View {
     }
 }
 
-#if !WHATCABLE_MAS
 struct UpdateBanner: View {
     let update: AvailableUpdate
     @ObservedObject private var installer = Installer.shared
@@ -395,7 +393,6 @@ struct UpdateBanner: View {
         }
     }
 }
-#endif // !WHATCABLE_MAS
 
 // MARK: - Port card
 
@@ -413,6 +410,9 @@ struct PortCard: View {
     let showAdvanced: Bool
 
     @State private var reportingCable: PDIdentity?
+#if WHATCABLE_PRO
+    @State private var showProRequiredMessage = false
+#endif
 
     var summary: PortSummary {
         PortSummary(
@@ -457,6 +457,24 @@ struct PortCard: View {
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
+#if WHATCABLE_PRO
+                VStack(alignment: .trailing, spacing: 3) {
+                    Button {
+                        openDiagnostics()
+                    } label: {
+                        Label(String(localized: "Diagnostics", bundle: .module), systemImage: "waveform.path.ecg")
+                            .scaledFont(.caption)
+                    }
+                    .buttonStyle(.borderless)
+                    .help(String(localized: "Open Pro diagnostics for this port", bundle: .module))
+
+                    if showProRequiredMessage {
+                        Text(String(localized: "Pro required", bundle: .module))
+                            .scaledFont(.caption2)
+                            .foregroundStyle(.orange)
+                    }
+                }
+#endif
             }
 
             if !summary.bullets.isEmpty {
@@ -533,6 +551,34 @@ struct PortCard: View {
             }
         }
     }
+
+#if WHATCABLE_PRO
+    private func openDiagnostics() {
+        guard LicenceManager.shared.isUnlocked else {
+            showProRequiredMessage = true
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(2))
+                showProRequiredMessage = false
+            }
+            return
+        }
+
+        ProDiagnosticWindowManager.shared.openCableDiagnostic(port: diagnosticPortNumber)
+    }
+
+    private var diagnosticPortNumber: Int {
+        if let portNumber = port.portNumber, portNumber > 0 {
+            return portNumber
+        }
+        if let at = port.serviceName.lastIndex(of: "@") {
+            let suffix = port.serviceName[port.serviceName.index(after: at)...]
+            if let value = Int(suffix), value > 0 {
+                return value
+            }
+        }
+        return 0
+    }
+#endif
 }
 
 struct DiagnosticBanner: View {
@@ -768,4 +814,3 @@ private struct TrustFlagsCard: View {
         .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
     }
 }
-

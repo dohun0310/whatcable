@@ -76,4 +76,16 @@ public struct PDIdentity: Identifiable, Hashable {
               idHeader?.ufpProductType == .activeCable else { return nil }
         return PDVDO.decodeActiveCableVDO2(vdos[4])
     }
+
+    /// Human-readable PD spec revision (e.g. "PD 3.1"). The raw value from
+    /// IOKit matches the 2-bit SpecRevision field in USB-PD message headers:
+    /// 0 = unset/unknown, 1 = PD 2.0, 2 = PD 3.0, 3 = PD 3.1
+    public var pdRevisionLabel: String? {
+        switch specRevision {
+        case 1: return "PD 2.0"
+        case 2: return "PD 3.0"
+        case 3: return "PD 3.1"
+        default: return nil
+        }
+    }
 }

@@ -114,7 +114,11 @@ extension PortSummary {
         }
 
         if hasDP {
-            bullets.append(String(localized: "Carrying DisplayPort video", bundle: .module))
+            if let dpConfig = port.dpLaneConfig, dpConfig.isActive {
+                bullets.append(String(localized: "Carrying DisplayPort video (\(dpConfig.label))", bundle: .module))
+            } else {
+                bullets.append(String(localized: "Carrying DisplayPort video", bundle: .module))
+            }
         }
 
         // Partner identity (SOP): what's connected.
@@ -122,7 +126,11 @@ extension PortSummary {
            let header = partner.idHeader {
             let kind = header.ufpProductType != .undefined ? header.ufpProductType.label : header.dfpProductType.label
             let vendor = VendorDB.label(for: partner.vendorID)
-            bullets.append(String(localized: "Connected device: \(kind), \(vendor)", bundle: .module))
+            if let pdRev = partner.pdRevisionLabel {
+                bullets.append(String(localized: "Connected device: \(kind), \(vendor) (\(pdRev))", bundle: .module))
+            } else {
+                bullets.append(String(localized: "Connected device: \(kind), \(vendor)", bundle: .module))
+            }
         }
 
         // ------------------------------------------------------------

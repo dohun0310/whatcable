@@ -2,66 +2,85 @@
 import PackageDescription
 import Foundation
 
-// Mac App Store build flag. When `WHATCABLE_MAS=1` is in the environment at
-// build time, the WhatCable executable target is compiled with the
-// `WHATCABLE_MAS` Swift define. That gates out the self-hosted update path
-// (App Review forbids self-updaters) so the same source tree produces both
-// the OSS GitHub/Homebrew build and the App Store build.
+// Pro features live in a private submodule at app/. The submodule is always
+// present in release builds; open-source contributors can build the CLI and
+// free app without it.
 //
-// The flag is intentionally only consulted by Package.swift (and a small
-// set of source files marked in CLAUDE.md). If you find yourself wanting
-// to read it elsewhere, reread the discipline rule first.
-let isMASBuild = ProcessInfo.processInfo.environment["WHATCABLE_MAS"] == "1"
-let appSwiftSettings: [SwiftSetting] = isMASBuild ? [.define("WHATCABLE_MAS")] : []
+// Set WHATCABLE_PRO=1 in your environment (loaded from .env by build scripts)
+// to include the pro module. Pro features are then gated at RUNTIME by a
+// licence key, not at compile time. The define just controls whether the pro
+// code is linked into the binary.
+let includePro = ProcessInfo.processInfo.environment["WHATCABLE_PRO"] == "1"
+
+var appSwiftSettings: [SwiftSetting] = []
+var appDependencies: [Target.Dependency] = ["WhatCableCore", "WhatCableDarwinBackend"]
+var cliSwiftSettings: [SwiftSetting] = []
+var cliDependencies: [Target.Dependency] = ["WhatCableCore", "WhatCableDarwinBackend"]
+
+if includePro {
+    appDependencies.append("WhatCableProFeatures")
+    appSwiftSettings.append(.define("WHATCABLE_PRO"))
+    cliDependencies.append("WhatCableProFeatures")
+    cliSwiftSettings.append(.define("WHATCABLE_PRO"))
+}
+
+var targets: [Target] = [
+    .target(
+        name: "WhatCableCore",
+        path: "Sources/WhatCableCore",
+        resources: [.process("Resources")]
+    ),
+    .target(
+        name: "WhatCableDarwinBackend",
+        dependencies: ["WhatCableCore"],
+        path: "Sources/WhatCableDarwinBackend"
+    ),
+    .executableTarget(
+        name: "WhatCableCLI",
+        dependencies: cliDependencies,
+        path: "Sources/WhatCableCLI",
+        swiftSettings: cliSwiftSettings.isEmpty ? nil : cliSwiftSettings
+    ),
+    .testTarget(
+        name: "WhatCableCoreTests",
+        dependencies: ["WhatCableCore"],
+        path: "Tests/WhatCableCoreTests"
+    ),
+    .testTarget(
+        name: "WhatCableDarwinTests",
+        dependencies: ["WhatCableCore", "WhatCable", "WhatCableDarwinBackend"],
+        path: "Tests/WhatCableDarwinTests"
+    )
+]
+
+if includePro {
+    targets.append(
+        .target(
+            name: "WhatCableProFeatures",
+            dependencies: ["WhatCableCore", "WhatCableDarwinBackend"],
+            path: "app/Sources/WhatCableProFeatures"
+        )
+    )
+}
+
+targets.append(
+    .executableTarget(
+        name: "WhatCable",
+        dependencies: appDependencies,
+        path: "Sources/WhatCable",
+        resources: [.process("Resources")],
+        swiftSettings: appSwiftSettings.isEmpty ? nil : appSwiftSettings
+    )
+)
 
 let package = Package(
     name: "WhatCable",
     defaultLocalization: "en",
     platforms: [.macOS(.v14)],
     products: [
-        // Explicit executable product so the binary name (whatcable-cli)
-        // can differ from the Swift module name (WhatCableCLI). The
-        // module name needs to be a valid Swift identifier so it can be
-        // imported by tests.
         .executable(name: "WhatCable", targets: ["WhatCable"]),
         .executable(name: "whatcable-cli", targets: ["WhatCableCLI"]),
-        // Library product so the Xcode project's widget extension target
-        // can depend on WhatCableCore. Only consumed by the .xcodeproj;
-        // the CLI and GUI targets use the internal target dependency.
         .library(name: "WhatCableCore", targets: ["WhatCableCore"])
     ],
-    targets: [
-        .target(
-            name: "WhatCableCore",
-            path: "Sources/WhatCableCore",
-            resources: [.process("Resources")]
-        ),
-        .target(
-            name: "WhatCableDarwinBackend",
-            dependencies: ["WhatCableCore"],
-            path: "Sources/WhatCableDarwinBackend"
-        ),
-        .executableTarget(
-            name: "WhatCable",
-            dependencies: ["WhatCableCore", "WhatCableDarwinBackend"],
-            path: "Sources/WhatCable",
-            resources: [.process("Resources")],
-            swiftSettings: appSwiftSettings
-        ),
-        .executableTarget(
-            name: "WhatCableCLI",
-            dependencies: ["WhatCableCore", "WhatCableDarwinBackend"],
-            path: "Sources/WhatCableCLI"
-        ),
-        .testTarget(
-            name: "WhatCableCoreTests",
-            dependencies: ["WhatCableCore"],
-            path: "Tests/WhatCableCoreTests"
-        ),
-        .testTarget(
-            name: "WhatCableDarwinTests",
-            dependencies: ["WhatCableCore", "WhatCable", "WhatCableDarwinBackend"],
-            path: "Tests/WhatCableDarwinTests"
-        )
-    ]
+    targets: targets
 )

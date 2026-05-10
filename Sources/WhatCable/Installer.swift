@@ -1,8 +1,4 @@
-// In-process installer for the OSS self-update path. Compiled out of
-// the Mac App Store build (`WHATCABLE_MAS`) since the App Store handles
-// install/upgrade itself and `AvailableUpdate` (declared in
-// `UpdateChecker.swift`) is also gated out.
-#if !WHATCABLE_MAS
+// In-process installer for the self-update path.
 import Foundation
 import AppKit
 import os.log
@@ -221,5 +217,5 @@ private struct InstallError: LocalizedError {
     init(_ message: String) { self.errorDescription = message }
 }
 
-#endif // !WHATCABLE_MAS
+
 

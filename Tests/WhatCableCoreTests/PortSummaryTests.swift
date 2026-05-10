@@ -394,4 +394,85 @@ final class PortSummaryTests: XCTestCase {
         // C: power negotiation tail
         XCTAssertLessThan(chargerIdx!, negotiatedIdx!, "Charger max should come before currently negotiated")
     }
+
+    // MARK: - DisplayPort lane config
+
+    func testDPBulletIncludesLaneCountWhenPinAssignmentPresent() {
+        let port = USBCPort(
+            id: 1, serviceName: "Port-USB-C@1", className: "AppleHPMInterfaceType10",
+            portDescription: "Port-USB-C@1", portTypeDescription: "USB-C",
+            portNumber: 1, connectionActive: true, activeCable: nil, opticalCable: nil,
+            usbActive: nil, superSpeedActive: nil, usbModeType: nil, usbConnectString: nil,
+            transportsSupported: ["CC", "USB2", "DisplayPort"],
+            transportsActive: ["DisplayPort"],
+            transportsProvisioned: [],
+            plugOrientation: nil, plugEventCount: nil, connectionCount: nil,
+            overcurrentCount: nil, pinConfiguration: [:],
+            displayPortPinAssignment: 1,
+            powerCurrentLimits: [],
+            firmwareVersion: nil, bootFlagsHex: nil, rawProperties: [:]
+        )
+        let summary = PortSummary(port: port)
+        let dpBullet = summary.bullets.first { $0.contains("DisplayPort") }
+        XCTAssertNotNil(dpBullet)
+        XCTAssertTrue(dpBullet!.contains("4 DP lanes"), "Expected 4-lane info, got: \(dpBullet!)")
+    }
+
+    func testDPBulletShowsTwoLaneForAssignmentD() {
+        let port = USBCPort(
+            id: 1, serviceName: "Port-USB-C@1", className: "AppleHPMInterfaceType10",
+            portDescription: "Port-USB-C@1", portTypeDescription: "USB-C",
+            portNumber: 1, connectionActive: true, activeCable: nil, opticalCable: nil,
+            usbActive: nil, superSpeedActive: true, usbModeType: nil, usbConnectString: nil,
+            transportsSupported: ["CC", "USB2", "USB3", "DisplayPort"],
+            transportsActive: ["USB3", "DisplayPort"],
+            transportsProvisioned: [],
+            plugOrientation: nil, plugEventCount: nil, connectionCount: nil,
+            overcurrentCount: nil, pinConfiguration: [:],
+            displayPortPinAssignment: 2,
+            powerCurrentLimits: [],
+            firmwareVersion: nil, bootFlagsHex: nil, rawProperties: [:]
+        )
+        let summary = PortSummary(port: port)
+        let dpBullet = summary.bullets.first { $0.contains("DisplayPort") }
+        XCTAssertNotNil(dpBullet)
+        XCTAssertTrue(dpBullet!.contains("2 DP lanes"), "Expected 2-lane info, got: \(dpBullet!)")
+    }
+
+    func testDPBulletFallsBackWhenNoPinAssignment() {
+        let port = makePort(active: ["DisplayPort"])
+        let summary = PortSummary(port: port)
+        let dpBullet = summary.bullets.first { $0.contains("DisplayPort") }
+        XCTAssertEqual(dpBullet, "Carrying DisplayPort video")
+    }
+
+    // MARK: - Partner PD revision
+
+    func testPartnerBulletIncludesPDRevision() {
+        let port = makePort(active: ["USB3"], supported: ["CC"], superSpeed: true)
+        let partner = PDIdentity(
+            id: 50, endpoint: .sop,
+            parentPortType: 2, parentPortNumber: 1,
+            vendorID: 0x05AC, productID: 0x1234, bcdDevice: 0,
+            vdos: [0x6C00_05AC], specRevision: 3
+        )
+        let summary = PortSummary(port: port, identities: [partner])
+        let deviceBullet = summary.bullets.first { $0.contains("Connected device") }
+        XCTAssertNotNil(deviceBullet)
+        XCTAssertTrue(deviceBullet!.contains("PD 3.1"), "Expected PD revision, got: \(deviceBullet!)")
+    }
+
+    func testPartnerBulletOmitsPDRevisionWhenZero() {
+        let port = makePort(active: ["USB3"], supported: ["CC"], superSpeed: true)
+        let partner = PDIdentity(
+            id: 50, endpoint: .sop,
+            parentPortType: 2, parentPortNumber: 1,
+            vendorID: 0x05AC, productID: 0x1234, bcdDevice: 0,
+            vdos: [0x6C00_05AC], specRevision: 0
+        )
+        let summary = PortSummary(port: port, identities: [partner])
+        let deviceBullet = summary.bullets.first { $0.contains("Connected device") }
+        XCTAssertNotNil(deviceBullet)
+        XCTAssertFalse(deviceBullet!.contains("PD"), "Should not show PD revision when unknown")
+    }
 }

@@ -1,7 +1,4 @@
-// Self-hosted update checker for the OSS build. Compiled out of the
-// Mac App Store build (`WHATCABLE_MAS`) because App Review rejects apps
-// that ship their own updater — the App Store handles updates itself.
-#if !WHATCABLE_MAS
+// Self-hosted update checker.
 import Foundation
 import AppKit
 import UserNotifications
@@ -182,6 +179,4 @@ final class UpdateChecker: ObservableObject {
         return trusted.contains(host)
     }
 }
-
-#endif // !WHATCABLE_MAS
 
