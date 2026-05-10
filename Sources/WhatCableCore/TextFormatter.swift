@@ -7,13 +7,18 @@ public enum TextFormatter {
         identities: [PDIdentity],
         showRaw: Bool,
         adapter: AdapterInfo? = nil,
-        thunderboltSwitches: [ThunderboltSwitch] = []
+        thunderboltSwitches: [ThunderboltSwitch] = [],
+        isDesktopMac: Bool = false,
+        federatedIdentities: [FederatedIdentity] = []
     ) -> String {
         if ports.isEmpty {
             return String(localized: "No USB-C / MagSafe ports were found on this Mac.", bundle: .module) + "\n"
         }
 
         var out = ""
+        if isDesktopMac {
+            out += ANSI.wrap(ANSI.dim, "Desktop Mac: per-port PD diagnostics are not available (no battery controller).") + "\n\n"
+        }
         for (i, port) in ports.enumerated() {
             if i > 0 { out += "\n" }
             out += renderPort(
@@ -22,7 +27,8 @@ public enum TextFormatter {
                 identities: filterIdentities(port, all: identities),
                 showRaw: showRaw,
                 adapter: adapter,
-                thunderboltSwitches: thunderboltSwitches
+                thunderboltSwitches: thunderboltSwitches,
+                federatedIdentities: federatedIdentities
             )
         }
         return out
@@ -34,13 +40,15 @@ public enum TextFormatter {
         identities: [PDIdentity],
         showRaw: Bool,
         adapter: AdapterInfo?,
-        thunderboltSwitches: [ThunderboltSwitch]
+        thunderboltSwitches: [ThunderboltSwitch],
+        federatedIdentities: [FederatedIdentity] = []
     ) -> String {
         let summary = PortSummary(
             port: port,
             sources: sources,
             identities: identities,
-            thunderboltSwitches: thunderboltSwitches
+            thunderboltSwitches: thunderboltSwitches,
+            federatedIdentities: federatedIdentities
         )
         let label = port.portDescription ?? port.serviceName
         let typeSuffix = port.portTypeDescription.map { " (\($0))" } ?? ""

@@ -27,6 +27,13 @@ public struct CableSnapshot: Equatable {
     /// nothing (the JSON shape adds the key but with an empty array, so
     /// downstream consumers can rely on the field always being present).
     public let thunderboltSwitches: [ThunderboltSwitch]
+    /// True on desktop Macs (Mac Studio, Mac Mini, Mac Pro) where the
+    /// AppleSmartBattery node is absent or reports BatteryInstalled=false.
+    /// Per-port PD diagnostics from the battery controller are unavailable.
+    public let isDesktopMac: Bool
+    /// Per-port federated PD identity from AppleSmartBattery's FedDetails.
+    /// Empty on desktops or when nothing is connected.
+    public let federatedIdentities: [FederatedIdentity]
 
     public init(
         ports: [USBCPort],
@@ -34,7 +41,9 @@ public struct CableSnapshot: Equatable {
         identities: [PDIdentity],
         usbDevices: [USBDevice],
         adapter: AdapterInfo?,
-        thunderboltSwitches: [ThunderboltSwitch] = []
+        thunderboltSwitches: [ThunderboltSwitch] = [],
+        isDesktopMac: Bool = false,
+        federatedIdentities: [FederatedIdentity] = []
     ) {
         self.ports = ports
         self.powerSources = powerSources
@@ -42,6 +51,8 @@ public struct CableSnapshot: Equatable {
         self.usbDevices = usbDevices
         self.adapter = adapter
         self.thunderboltSwitches = thunderboltSwitches
+        self.isDesktopMac = isDesktopMac
+        self.federatedIdentities = federatedIdentities
     }
 }
 

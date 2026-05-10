@@ -39,13 +39,16 @@ public final class DarwinSnapshotProvider: CableSnapshotProvider, @unchecked Sen
             powerWatcher.refresh()
             pdWatcher.refresh()
             tbWatcher.refresh()
+            let battery = SmartBatteryReader.read()
             return CableSnapshot(
                 ports: portWatcher.ports,
                 powerSources: powerWatcher.sources,
                 identities: pdWatcher.identities,
                 usbDevices: usbWatcher.devices,
                 adapter: SystemPower.currentAdapter(),
-                thunderboltSwitches: tbWatcher.switches
+                thunderboltSwitches: tbWatcher.switches,
+                isDesktopMac: battery.isDesktopMac,
+                federatedIdentities: battery.federatedIdentities
             )
         }
     }

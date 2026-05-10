@@ -119,7 +119,9 @@ private func printSnapshot(_ snapshot: CableSnapshot, asJSON: Bool, showRaw: Boo
             identities: snapshot.identities,
             showRaw: showRaw,
             adapter: snapshot.adapter,
-            thunderboltSwitches: snapshot.thunderboltSwitches
+            thunderboltSwitches: snapshot.thunderboltSwitches,
+            isDesktopMac: snapshot.isDesktopMac,
+            federatedIdentities: snapshot.federatedIdentities
         )
         print(json)
     } else {
@@ -129,7 +131,9 @@ private func printSnapshot(_ snapshot: CableSnapshot, asJSON: Bool, showRaw: Boo
             identities: snapshot.identities,
             showRaw: showRaw,
             adapter: snapshot.adapter,
-            thunderboltSwitches: snapshot.thunderboltSwitches
+            thunderboltSwitches: snapshot.thunderboltSwitches,
+            isDesktopMac: snapshot.isDesktopMac,
+            federatedIdentities: snapshot.federatedIdentities
         )
         print(output, terminator: "")
     }
@@ -176,7 +180,9 @@ private func consumeWatchStream(provider: any CableSnapshotProvider, asJSON: Boo
                         identities: snapshot.identities,
                         showRaw: showRaw,
                         adapter: snapshot.adapter,
-                        thunderboltSwitches: snapshot.thunderboltSwitches
+                        thunderboltSwitches: snapshot.thunderboltSwitches,
+                        isDesktopMac: snapshot.isDesktopMac,
+                        federatedIdentities: snapshot.federatedIdentities
                     )
                 } catch {
                     FileHandle.standardError.write(Data("whatcable: json encoding failed: \(error)\n".utf8))
@@ -189,7 +195,9 @@ private func consumeWatchStream(provider: any CableSnapshotProvider, asJSON: Boo
                     identities: snapshot.identities,
                     showRaw: showRaw,
                     adapter: snapshot.adapter,
-                    thunderboltSwitches: snapshot.thunderboltSwitches
+                    thunderboltSwitches: snapshot.thunderboltSwitches,
+                    isDesktopMac: snapshot.isDesktopMac,
+                    federatedIdentities: snapshot.federatedIdentities
                 )
             }
 

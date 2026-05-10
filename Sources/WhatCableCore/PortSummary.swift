@@ -39,6 +39,7 @@ extension PortSummary {
         identities: [PDIdentity] = [],
         devices: [USBDevice] = [],
         thunderboltSwitches: [ThunderboltSwitch] = [],
+        federatedIdentities: [FederatedIdentity] = [],
         isConnectedOverride: Bool? = nil
     ) {
         let connected = isConnectedOverride ?? (port.connectionActive == true)
@@ -131,6 +132,11 @@ extension PortSummary {
             } else {
                 bullets.append(String(localized: "Connected device: \(kind), \(vendor)", bundle: .module))
             }
+        } else if let portNum = port.portNumber,
+                  let fed = federatedIdentities.first(where: { $0.portIndex == portNum }),
+                  fed.hasDevice {
+            let vendor = VendorDB.label(for: fed.vendorID)
+            bullets.append(String(localized: "Connected device: \(vendor)", bundle: .module))
         }
 
         // ------------------------------------------------------------

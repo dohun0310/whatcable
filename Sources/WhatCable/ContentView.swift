@@ -81,6 +81,7 @@ struct ContentView: View {
     @ObservedObject private var updates = UpdateChecker.shared
     @State private var portRefreshTask: Task<Void, Never>?
     @State private var portPollTask: Task<Void, Never>?
+    @State private var isDesktopMac = false
 
     private var showAdvanced: Bool {
         settings.showTechnicalDetails || refresh.optionHeld
@@ -102,6 +103,7 @@ struct ContentView: View {
             pdWatcher.start()
             tbWatcher.start()
             startPortPoll()
+            isDesktopMac = SmartBatteryReader.read().isDesktopMac
         }
         .onDisappear {
             portRefreshTask?.cancel()
@@ -171,6 +173,16 @@ struct ContentView: View {
                 UpdateBanner(update: update)
             }
             Divider()
+            if isDesktopMac {
+                HStack(spacing: 4) {
+                    Image(systemName: "info.circle")
+                    Text("Desktop Mac: per-port PD diagnostics are not available.")
+                }
+                .scaledFont(.caption)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+            }
             let visiblePorts = settings.hideEmptyPorts
                 ? portWatcher.ports.filter { isPortLive($0) }
                 : portWatcher.ports

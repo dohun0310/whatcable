@@ -7,10 +7,13 @@ public enum JSONFormatter {
         identities: [PDIdentity],
         showRaw: Bool,
         adapter: AdapterInfo? = nil,
-        thunderboltSwitches: [ThunderboltSwitch] = []
+        thunderboltSwitches: [ThunderboltSwitch] = [],
+        isDesktopMac: Bool = false,
+        federatedIdentities: [FederatedIdentity] = []
     ) throws -> String {
         let output = Output(
             version: AppInfo.version,
+            isDesktopMac: isDesktopMac,
             ports: ports.map { port in
                 PortDTO(
                     port: port,
@@ -18,7 +21,8 @@ public enum JSONFormatter {
                     identities: identities.filter { $0.portKey == port.portKey },
                     thunderboltSwitches: thunderboltSwitches,
                     showRaw: showRaw,
-                    adapter: adapter
+                    adapter: adapter,
+                    federatedIdentities: federatedIdentities
                 )
             },
             thunderboltSwitches: thunderboltSwitches.map { ThunderboltSwitchDTO(sw: $0) }
@@ -32,6 +36,7 @@ public enum JSONFormatter {
 
 private struct Output: Codable {
     let version: String
+    let isDesktopMac: Bool
     let ports: [PortDTO]
     /// Top-level Thunderbolt fabric. Always present (empty array on
     /// machines without a TB controller, or before the watcher has data).
@@ -69,7 +74,8 @@ private struct PortDTO: Codable {
         identities: [PDIdentity],
         thunderboltSwitches: [ThunderboltSwitch],
         showRaw: Bool,
-        adapter: AdapterInfo?
+        adapter: AdapterInfo?,
+        federatedIdentities: [FederatedIdentity] = []
     ) {
         self.name = port.portDescription ?? port.serviceName
         self.type = port.portTypeDescription
@@ -81,7 +87,8 @@ private struct PortDTO: Codable {
             port: port,
             sources: sources,
             identities: identities,
-            thunderboltSwitches: thunderboltSwitches
+            thunderboltSwitches: thunderboltSwitches,
+            federatedIdentities: federatedIdentities
         )
         self.status = String(describing: summary.status)
         self.headline = summary.headline
