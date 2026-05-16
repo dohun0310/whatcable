@@ -184,7 +184,7 @@
 "Mode" = "Mode";
 "Monitor" = "Monitor";
 "Native" = "Native";
-"Negotiated max. Live per-port metering is not available on this hardware." = "Negotiated max. Live per-port metering is not available on this hardware.";
+"Port maximum. Live per-port metering is not available on this hardware." = "Port maximum. Live per-port metering is not available on this hardware.";
 "No" = "No";
 "No PD contract data" = "No PD contract data";
 "No PD events" = "No PD events";
