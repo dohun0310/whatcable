@@ -86,8 +86,8 @@ final class TextFormatterTests: XCTestCase {
         portNumber: Int = 1,
         vendorID: Int = 0x05AC,
         cableVDO: UInt32 = (0b10 << 5) | 0b011 | (1 << 13)
-    ) -> PDIdentity {
-        PDIdentity(
+    ) -> USBPDSOP {
+        USBPDSOP(
             id: 1,
             endpoint: .sopPrime,
             parentPortType: 2,
@@ -150,7 +150,7 @@ final class TextFormatterTests: XCTestCase {
         vdo4 |= UInt32(1) << 2   // isolated
         // bits 8 / 5 / 4 left at 0 = USB4 / USB 3.2 / USB 2.0 supported.
         let vdo3: UInt32 = UInt32(0b011) | UInt32(2 << 5) | UInt32(1 << 13) | UInt32(0b10 << 11)
-        let active = PDIdentity(
+        let active = USBPDSOP(
             id: 1, endpoint: .sopPrime,
             parentPortType: 2,
             parentPortNumber: port.portNumber ?? 1,
@@ -170,7 +170,7 @@ final class TextFormatterTests: XCTestCase {
     func testActiveCableVDO2SectionAbsentWithoutRawFlag() {
         let port = makePort()
         let vdo3: UInt32 = UInt32(0b011) | UInt32(2 << 5) | UInt32(1 << 13) | UInt32(0b10 << 11)
-        let active = PDIdentity(
+        let active = USBPDSOP(
             id: 1, endpoint: .sopPrime,
             parentPortType: 2,
             parentPortNumber: port.portNumber ?? 1,
@@ -191,7 +191,7 @@ final class TextFormatterTests: XCTestCase {
         // SOP (port partner) shouldn't be evaluated as a cable, so even
         // a zero VID on a port-partner identity shouldn't trip the section.
         let port = makePort()
-        let partner = PDIdentity(
+        let partner = USBPDSOP(
             id: 1,
             endpoint: .sop,
             parentPortType: 2,

@@ -4,10 +4,10 @@ public enum JSONFormatter {
     public static func render(
         ports: [USBCPort],
         sources: [PowerSource],
-        identities: [PDIdentity],
+        identities: [USBPDSOP],
         showRaw: Bool,
         adapter: AdapterInfo? = nil,
-        thunderboltSwitches: [ThunderboltSwitch] = [],
+        thunderboltSwitches: [IOThunderboltSwitch] = [],
         isDesktopMac: Bool = false,
         federatedIdentities: [FederatedIdentity] = [],
         usb3Transports: [USB3Transport] = [],
@@ -42,7 +42,7 @@ public enum JSONFormatter {
                     usbDevices: port.matchingDevices(from: usbDevices)
                 )
             },
-            thunderboltSwitches: thunderboltSwitches.map { ThunderboltSwitchDTO(sw: $0) }
+            thunderboltSwitches: thunderboltSwitches.map { IOThunderboltSwitchDTO(sw: $0) }
         )
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -62,7 +62,7 @@ private struct Output: Codable {
     /// machines without a TB controller, or before the watcher has data).
     /// Per-port `thunderboltSwitchUID` references this graph by UID rather
     /// than nesting the whole switch under each port.
-    let thunderboltSwitches: [ThunderboltSwitchDTO]
+    let thunderboltSwitches: [IOThunderboltSwitchDTO]
 }
 
 private struct PortDTO: Codable {
@@ -97,8 +97,8 @@ private struct PortDTO: Codable {
     init(
         port: USBCPort,
         sources: [PowerSource],
-        identities: [PDIdentity],
-        thunderboltSwitches: [ThunderboltSwitch],
+        identities: [USBPDSOP],
+        thunderboltSwitches: [IOThunderboltSwitch],
         showRaw: Bool,
         adapter: AdapterInfo?,
         federatedIdentities: [FederatedIdentity] = [],
@@ -218,7 +218,7 @@ private struct CableDTO: Codable {
     let active: ActiveCableDTO?
     let trustFlags: [TrustFlagDTO]?
 
-    init(identity: PDIdentity) {
+    init(identity: USBPDSOP) {
         self.endpoint = identity.endpoint.rawValue
         self.vendorID = identity.vendorID
         self.vendorName = VendorDB.name(for: identity.vendorID)
@@ -294,7 +294,7 @@ private struct DeviceDTO: Codable {
     let productID: Int
     let pdRevision: String?
 
-    init(identity: PDIdentity) {
+    init(identity: USBPDSOP) {
         let header = identity.idHeader
         self.kind = header.map {
             $0.ufpProductType != .undefined ? $0.ufpProductType.label : $0.dfpProductType.label
@@ -311,7 +311,7 @@ private struct DeviceDTO: Codable {
 /// One Thunderbolt switch in JSON form. Encoded once at the top level of
 /// the snapshot; per-port references use `thunderboltSwitchUID`. Avoids
 /// duplicating the whole graph under every port.
-private struct ThunderboltSwitchDTO: Codable {
+private struct IOThunderboltSwitchDTO: Codable {
     let uid: Int64
     let className: String
     let vendorID: Int
@@ -324,9 +324,9 @@ private struct ThunderboltSwitchDTO: Codable {
     let maxPortNumber: Int
     let supportedSpeedMask: Int
     let parentSwitchUID: Int64?
-    let ports: [ThunderboltPortDTO]
+    let ports: [IOThunderboltPortDTO]
 
-    init(sw: ThunderboltSwitch) {
+    init(sw: IOThunderboltSwitch) {
         self.uid = sw.id
         self.className = sw.className
         self.vendorID = sw.vendorID
@@ -339,11 +339,11 @@ private struct ThunderboltSwitchDTO: Codable {
         self.maxPortNumber = sw.maxPortNumber
         self.supportedSpeedMask = Int(sw.supportedSpeed.rawValue)
         self.parentSwitchUID = sw.parentSwitchUID
-        self.ports = sw.ports.map { ThunderboltPortDTO(port: $0) }
+        self.ports = sw.ports.map { IOThunderboltPortDTO(port: $0) }
     }
 }
 
-private struct ThunderboltPortDTO: Codable {
+private struct IOThunderboltPortDTO: Codable {
     let portNumber: Int
     let socketID: String?
     let adapterType: String
@@ -358,7 +358,7 @@ private struct ThunderboltPortDTO: Codable {
     let rawTargetSpeed: Int?
     let linkBandwidthRaw: Int?
 
-    init(port: ThunderboltPort) {
+    init(port: IOThunderboltPort) {
         self.portNumber = port.portNumber
         self.socketID = port.socketID
         self.adapterType = Self.adapterTypeLabel(port.adapterType)

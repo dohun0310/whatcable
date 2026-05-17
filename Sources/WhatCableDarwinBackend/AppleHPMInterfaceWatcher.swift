@@ -5,7 +5,7 @@ import WhatCableCore
 /// Watches USB-C / MagSafe port-controller services. On Apple-silicon Macs the
 /// relevant class is `AppleHPMInterfaceType10` (USB-C) and `Type11` (MagSafe).
 @MainActor
-public final class USBCPortWatcher: ObservableObject {
+public final class AppleHPMInterfaceWatcher: ObservableObject {
     @Published public private(set) var ports: [USBCPort] = []
 
     // Match only Type-C / MagSafe physical port controllers. Generic
@@ -47,7 +47,7 @@ public final class USBCPortWatcher: ObservableObject {
         let selfPtr = Unmanaged.passUnretained(self).toOpaque()
         let cb: IOServiceMatchingCallback = { refcon, iterator in
             guard let refcon else { return }
-            let watcher = Unmanaged<USBCPortWatcher>.fromOpaque(refcon).takeUnretainedValue()
+            let watcher = Unmanaged<AppleHPMInterfaceWatcher>.fromOpaque(refcon).takeUnretainedValue()
             Task { @MainActor in watcher.drain(iterator: iterator) }
         }
 
@@ -131,7 +131,7 @@ public final class USBCPortWatcher: ObservableObject {
         let selfPtr = Unmanaged.passUnretained(self).toOpaque()
         let cb: IOServiceInterestCallback = { refcon, _, _, _ in
             guard let refcon else { return }
-            let watcher = Unmanaged<USBCPortWatcher>.fromOpaque(refcon).takeUnretainedValue()
+            let watcher = Unmanaged<AppleHPMInterfaceWatcher>.fromOpaque(refcon).takeUnretainedValue()
             Task { @MainActor in watcher.refresh() }
         }
         var notification: io_object_t = 0

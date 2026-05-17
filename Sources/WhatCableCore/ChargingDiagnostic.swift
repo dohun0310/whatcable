@@ -27,7 +27,7 @@ extension ChargingDiagnostic {
     public init?(
         port: USBCPort,
         sources: [PowerSource],
-        identities: [PDIdentity],
+        identities: [USBPDSOP],
         adapter: AdapterInfo? = nil,
         wattageSource: ChargerWattageSource = .unknown
     ) {

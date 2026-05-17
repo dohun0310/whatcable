@@ -176,7 +176,7 @@ public enum AdapterType: Hashable {
 
 /// One Thunderbolt switch in the fabric. Could be a host root (Depth=0)
 /// or a downstream device's internal switch (Depth>0).
-public struct ThunderboltSwitch: Identifiable, Hashable {
+public struct IOThunderboltSwitch: Identifiable, Hashable {
     public let id: Int64                    // UID (signed Int64; can be negative)
     public let className: String            // raw IOKit class
     public let vendorID: Int
@@ -188,11 +188,27 @@ public struct ThunderboltSwitch: Identifiable, Hashable {
     public let upstreamPortNumber: Int
     public let maxPortNumber: Int
     public let supportedSpeed: SupportedSpeedMask
-    public let ports: [ThunderboltPort]
+    public let ports: [IOThunderboltPort]
     /// Parent switch UID, populated by the watcher via the IOKit parent
     /// chain. `nil` on host roots. Phase 3 (rendering) uses this to walk
     /// the topology without re-parsing Route String / Hop Table.
     public let parentSwitchUID: Int64?
+    /// CIO firmware version string with build date and chip ID.
+    public let firmwareVersion: String?
+    /// Protocol version (64 = USB4/TB4).
+    public let thunderboltVersion: Int?
+    /// Controller chip device ID.
+    public let deviceID: Int?
+    /// Current power state (0 = sleeping, 2 = active).
+    public let currentPowerState: Int?
+    /// Firmware event counters (binary blob, 348 bytes).
+    public let fwCounters: Data?
+    /// Lifetime firmware event totals (binary blob, 348 bytes).
+    public let fwCountersRunningTotal: Data?
+    /// Device ROM topology descriptor.
+    public let drom: Data?
+    /// Time Management Unit mode requirement.
+    public let minRequiredTMUMode: Int?
 
     public init(
         id: Int64,
@@ -206,8 +222,16 @@ public struct ThunderboltSwitch: Identifiable, Hashable {
         upstreamPortNumber: Int,
         maxPortNumber: Int,
         supportedSpeed: SupportedSpeedMask,
-        ports: [ThunderboltPort],
-        parentSwitchUID: Int64?
+        ports: [IOThunderboltPort],
+        parentSwitchUID: Int64?,
+        firmwareVersion: String? = nil,
+        thunderboltVersion: Int? = nil,
+        deviceID: Int? = nil,
+        currentPowerState: Int? = nil,
+        fwCounters: Data? = nil,
+        fwCountersRunningTotal: Data? = nil,
+        drom: Data? = nil,
+        minRequiredTMUMode: Int? = nil
     ) {
         self.id = id
         self.className = className
@@ -222,9 +246,17 @@ public struct ThunderboltSwitch: Identifiable, Hashable {
         self.supportedSpeed = supportedSpeed
         self.ports = ports
         self.parentSwitchUID = parentSwitchUID
+        self.firmwareVersion = firmwareVersion
+        self.thunderboltVersion = thunderboltVersion
+        self.deviceID = deviceID
+        self.currentPowerState = currentPowerState
+        self.fwCounters = fwCounters
+        self.fwCountersRunningTotal = fwCountersRunningTotal
+        self.drom = drom
+        self.minRequiredTMUMode = minRequiredTMUMode
     }
 
-    /// Build a `ThunderboltSwitch` from a raw IOKit property dictionary
+    /// Build a `IOThunderboltSwitch` from a raw IOKit property dictionary
     /// plus a list of already-parsed child ports. Returns `nil` if the
     /// dictionary is missing the minimum identifying fields (UID + Vendor ID).
     /// Lives here in `WhatCableCore` so it can be exercised against fixture
@@ -232,14 +264,22 @@ public struct ThunderboltSwitch: Identifiable, Hashable {
     public static func from(
         properties: [String: Any],
         className: String,
-        ports: [ThunderboltPort],
+        ports: [IOThunderboltPort],
         parentSwitchUID: Int64? = nil
-    ) -> ThunderboltSwitch? {
+    ) -> IOThunderboltSwitch? {
         guard let uidNum = properties["UID"] as? NSNumber else { return nil }
         guard let vendorIDNum = properties["Vendor ID"] as? NSNumber else { return nil }
 
         let speedMaskRaw = (properties["Supported Link Speed"] as? NSNumber)?.uint8Value ?? 0
-        return ThunderboltSwitch(
+
+        let powerState: Int?
+        if let pmDict = properties["IOPowerManagement"] as? [String: Any] {
+            powerState = (pmDict["CurrentPowerState"] as? NSNumber)?.intValue
+        } else {
+            powerState = nil
+        }
+
+        return IOThunderboltSwitch(
             id: uidNum.int64Value,
             className: className,
             vendorID: vendorIDNum.intValue,
@@ -252,29 +292,44 @@ public struct ThunderboltSwitch: Identifiable, Hashable {
             maxPortNumber: (properties["Max Port Number"] as? NSNumber)?.intValue ?? 0,
             supportedSpeed: SupportedSpeedMask(rawValue: speedMaskRaw),
             ports: ports,
-            parentSwitchUID: parentSwitchUID
+            parentSwitchUID: parentSwitchUID,
+            firmwareVersion: properties["Firmware Version"] as? String,
+            thunderboltVersion: (properties["Thunderbolt Version"] as? NSNumber)?.intValue,
+            deviceID: (properties["Device ID"] as? NSNumber)?.intValue,
+            currentPowerState: powerState,
+            fwCounters: properties["FW Counters"] as? Data,
+            fwCountersRunningTotal: properties["FW Counters Running Total"] as? Data,
+            drom: properties["DROM"] as? Data,
+            minRequiredTMUMode: (properties["Min Required TMU Mode"] as? NSNumber)?.intValue
         )
     }
 
     /// True for switches the host owns directly (Depth=0).
     public var isHostRoot: Bool { depth == 0 }
+
+    /// True when the controller is in an active power state.
+    public var isAwake: Bool { currentPowerState == 2 }
 }
 
 /// One adapter on a Thunderbolt switch. Could be a physical TB lane port
 /// (with link-state fields) or a protocol-tunnel adapter (DP, PCIe, USB3).
-public struct ThunderboltPort: Hashable {
+public struct IOThunderboltPort: Hashable {
     public let portNumber: Int
     /// String form of `Socket ID`, present on TB-protocol ports.
     /// Matches the `@N` suffix on a root host's USB-C port for the
     /// host-port-to-switch correlation key.
     public let socketID: String?
     public let adapterType: AdapterType
+    /// Human-readable adapter description from IOKit (e.g. "Thunderbolt Port", "DP or HDMI Adapter").
+    public let adapterDescription: String?
     /// Decoded `Current Link Speed`. `nil` on idle ports or non-lane adapters.
     public let currentSpeed: LinkGeneration?
     /// Decoded `Current Link Width`. `nil` on non-lane adapters; on idle
     /// lane ports, `LinkWidth.isActive` will be false.
     public let currentWidth: LinkWidth?
     public let targetWidth: TargetLinkWidth?
+    /// Hardware-supported maximum link width.
+    public let supportedWidth: LinkWidth?
     /// Per-lane Gb/s if we have a known generation, else `nil`. Convenience
     /// derived from `currentSpeed` so renderers don't need to switch on it.
     public let perLaneGbps: Int?
@@ -288,70 +343,165 @@ public struct ThunderboltPort: Hashable {
     /// Raw `Link Bandwidth`. Unitless aggregate that scales with active
     /// lanes; useful for diagnostics, not for user-facing labels.
     public let linkBandwidthRaw: Int?
+    /// Maximum bandwidth currently allocated to this adapter.
+    public let maxBandwidthAllocated: Int?
+    /// Minimum bandwidth required by connected devices.
+    public let requiredBandwidthAllocated: Int?
+    /// Buffer credits reserved per protocol tunnel.
+    public let bufferAllocation: BufferAllocation?
+    /// Total available buffer credits on this adapter.
+    public let maxCredits: Int?
+    /// Partner port number for dual-lane operation.
+    public let dualLinkPort: Int?
+    /// Lane number this adapter uses.
+    public let lane: Int?
+    /// Power management link state (0 = CL0 active, higher = deeper sleep).
+    public let clxState: Int?
+    /// Thunderbolt protocol version (64 = USB4/TB4).
+    public let thunderboltVersion: Int?
+    /// Hardware-supported maximum link speed as a bitmask.
+    public let supportedSpeed: SupportedSpeedMask?
+    /// TRM policy string (e.g. "Root" for the host switch).
+    public let trmPolicy: String?
+    /// Controller vendor ID (1452 = Apple).
+    public let vendorID: Int?
+    /// Controller device ID.
+    public let deviceID: Int?
+
+    public struct BufferAllocation: Hashable {
+        public let maxUSB3: Int
+        public let maxPCIe: Int
+        public let maxHI: Int
+        public let minDPAux: Int
+
+        public init(maxUSB3: Int, maxPCIe: Int, maxHI: Int, minDPAux: Int) {
+            self.maxUSB3 = maxUSB3
+            self.maxPCIe = maxPCIe
+            self.maxHI = maxHI
+            self.minDPAux = minDPAux
+        }
+    }
 
     public init(
         portNumber: Int,
         socketID: String?,
         adapterType: AdapterType,
+        adapterDescription: String? = nil,
         currentSpeed: LinkGeneration?,
         currentWidth: LinkWidth?,
         targetWidth: TargetLinkWidth?,
+        supportedWidth: LinkWidth? = nil,
         rawTargetSpeed: UInt8?,
-        linkBandwidthRaw: Int?
+        linkBandwidthRaw: Int?,
+        maxBandwidthAllocated: Int? = nil,
+        requiredBandwidthAllocated: Int? = nil,
+        bufferAllocation: BufferAllocation? = nil,
+        maxCredits: Int? = nil,
+        dualLinkPort: Int? = nil,
+        lane: Int? = nil,
+        clxState: Int? = nil,
+        supportedSpeed: SupportedSpeedMask? = nil,
+        trmPolicy: String? = nil,
+        thunderboltVersion: Int? = nil,
+        vendorID: Int? = nil,
+        deviceID: Int? = nil
     ) {
         self.portNumber = portNumber
         self.socketID = socketID
         self.adapterType = adapterType
+        self.adapterDescription = adapterDescription
         self.currentSpeed = currentSpeed
         self.currentWidth = currentWidth
         self.targetWidth = targetWidth
+        self.supportedWidth = supportedWidth
         self.perLaneGbps = currentSpeed?.perLaneGbps
         self.txLanes = currentWidth?.txLanes
         self.rxLanes = currentWidth?.rxLanes
         self.rawTargetSpeed = rawTargetSpeed
         self.linkBandwidthRaw = linkBandwidthRaw
+        self.maxBandwidthAllocated = maxBandwidthAllocated
+        self.requiredBandwidthAllocated = requiredBandwidthAllocated
+        self.bufferAllocation = bufferAllocation
+        self.maxCredits = maxCredits
+        self.dualLinkPort = dualLinkPort
+        self.lane = lane
+        self.clxState = clxState
+        self.supportedSpeed = supportedSpeed
+        self.trmPolicy = trmPolicy
+        self.thunderboltVersion = thunderboltVersion
+        self.vendorID = vendorID
+        self.deviceID = deviceID
     }
 
     /// Build a port from a raw IOKit property dictionary.
-    public static func from(properties: [String: Any]) -> ThunderboltPort? {
+    public static func from(properties: [String: Any]) -> IOThunderboltPort? {
         guard let portNumNum = properties["Port Number"] as? NSNumber else { return nil }
         let adapterRaw = (properties["Adapter Type"] as? NSNumber)?.uint32Value ?? 0
         let adapter = AdapterType.from(rawValue: adapterRaw)
 
-        // Socket ID is stored as a string in IOKit (e.g. "1", "2"). It
-        // appears on TB-protocol ports only.
         let socketID = properties["Socket ID"] as? String
+        let description = properties["Description"] as? String
 
         let speedRaw = (properties["Current Link Speed"] as? NSNumber)?.uint8Value ?? 0
         let widthRaw = (properties["Current Link Width"] as? NSNumber)?.uint8Value ?? 0
+        let supportedWidthRaw = (properties["Supported Link Width"] as? NSNumber)?.uint8Value ?? 0
         let targetWidthRaw = (properties["Target Link Width"] as? NSNumber)?.uint8Value ?? 0
         let targetSpeedRaw = (properties["Target Link Speed"] as? NSNumber)?.uint8Value
 
-        // Only populate link state on actual lane ports. Protocol
-        // adapters (DP, PCIe, USB3) don't carry link generation; their
-        // tunnel state is exposed via Hop Table, which we ignore in v1.
         let currentSpeed: LinkGeneration?
         let currentWidth: LinkWidth?
         let targetWidth: TargetLinkWidth?
+        let supportedWidth: LinkWidth?
         if adapter.isLane {
             currentSpeed = LinkGeneration.from(rawSpeedCode: speedRaw)
             currentWidth = LinkWidth(rawValue: widthRaw)
             targetWidth = TargetLinkWidth.from(rawValue: targetWidthRaw)
+            supportedWidth = supportedWidthRaw != 0 ? LinkWidth(rawValue: supportedWidthRaw) : nil
         } else {
             currentSpeed = nil
             currentWidth = nil
             targetWidth = nil
+            supportedWidth = nil
         }
 
-        return ThunderboltPort(
+        let bufferAlloc: BufferAllocation?
+        if let bufDict = properties["Buffer Allocation Request"] as? [String: Any] {
+            bufferAlloc = BufferAllocation(
+                maxUSB3: (bufDict["Max USB3"] as? NSNumber)?.intValue ?? 0,
+                maxPCIe: (bufDict["Max PCIe"] as? NSNumber)?.intValue ?? 0,
+                maxHI: (bufDict["Max HI"] as? NSNumber)?.intValue ?? 0,
+                minDPAux: (bufDict["Min DP Aux"] as? NSNumber)?.intValue ?? 0
+            )
+        } else {
+            bufferAlloc = nil
+        }
+
+        return IOThunderboltPort(
             portNumber: portNumNum.intValue,
             socketID: socketID,
             adapterType: adapter,
+            adapterDescription: description,
             currentSpeed: currentSpeed,
             currentWidth: currentWidth,
             targetWidth: targetWidth,
+            supportedWidth: supportedWidth,
             rawTargetSpeed: targetSpeedRaw,
-            linkBandwidthRaw: (properties["Link Bandwidth"] as? NSNumber)?.intValue
+            linkBandwidthRaw: (properties["Link Bandwidth"] as? NSNumber)?.intValue,
+            maxBandwidthAllocated: (properties["Maximum Bandwidth Allocated"] as? NSNumber)?.intValue,
+            requiredBandwidthAllocated: (properties["Required Bandwidth Allocated"] as? NSNumber)?.intValue,
+            bufferAllocation: bufferAlloc,
+            maxCredits: (properties["Max Credits"] as? NSNumber)?.intValue,
+            dualLinkPort: (properties["Dual-Link Port"] as? NSNumber)?.intValue,
+            lane: (properties["Lane"] as? NSNumber)?.intValue,
+            clxState: (properties["CLx State"] as? NSNumber)?.intValue,
+            supportedSpeed: {
+                let raw = (properties["Supported Link Speed"] as? NSNumber)?.uint8Value ?? 0
+                return raw != 0 ? SupportedSpeedMask(rawValue: raw) : nil
+            }(),
+            trmPolicy: properties["TRM Policy"] as? String,
+            thunderboltVersion: (properties["Thunderbolt Version"] as? NSNumber)?.intValue,
+            vendorID: (properties["Vendor ID"] as? NSNumber)?.intValue,
+            deviceID: (properties["Device ID"] as? NSNumber)?.intValue
         )
     }
 
@@ -361,5 +511,11 @@ public struct ThunderboltPort: Hashable {
         guard adapterType.isLane else { return false }
         guard let currentWidth, currentWidth.isActive else { return false }
         return currentSpeed != nil
+    }
+
+    /// True when the cable is limiting the link below what hardware supports.
+    public var isBandwidthLimited: Bool {
+        guard let supported = supportedWidth, let current = currentWidth else { return false }
+        return supported.dual && current.single
     }
 }

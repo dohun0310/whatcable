@@ -69,11 +69,11 @@ extension View {
 }
 
 struct ContentView: View {
-    @StateObject private var portWatcher = USBCPortWatcher()
+    @StateObject private var portWatcher = AppleHPMInterfaceWatcher()
     @StateObject private var deviceWatcher = USBWatcher()
     @StateObject private var powerWatcher = PowerSourceWatcher()
-    @StateObject private var pdWatcher = PDIdentityWatcher()
-    @StateObject private var tbWatcher = ThunderboltWatcher()
+    @StateObject private var pdWatcher = USBPDSOPWatcher()
+    @StateObject private var tbWatcher = IOIOThunderboltSwitchWatcher()
     @StateObject private var usb3Watcher = USB3TransportWatcher()
     @StateObject private var trmWatcher = TRMTransportWatcher()
     @EnvironmentObject private var refresh: RefreshSignal
@@ -105,7 +105,7 @@ struct ContentView: View {
             usb3Watcher.start()
             trmWatcher.start()
             startPortPoll()
-            isDesktopMac = SmartBatteryReader.read().isDesktopMac
+            isDesktopMac = AppleSmartBatteryReader.read().isDesktopMac
         }
         .onDisappear {
             portRefreshTask?.cancel()
@@ -160,7 +160,7 @@ struct ContentView: View {
     /// IOKit interest notifications when their connection state flips, and
     /// covers state changes that happen outside the burst window triggered
     /// by scheduleLivePortRefresh. The conditional assignment in
-    /// USBCPortWatcher.refresh() means polls are free when nothing changed.
+    /// AppleHPMInterfaceWatcher.refresh() means polls are free when nothing changed.
     private func startPortPoll() {
         portPollTask?.cancel()
         portPollTask = Task { @MainActor in
@@ -432,8 +432,8 @@ struct PortCard: View {
     let port: USBCPort
     let devices: [USBDevice]
     let powerSources: [PowerSource]
-    let identities: [PDIdentity]
-    let thunderboltSwitches: [ThunderboltSwitch]
+    let identities: [USBPDSOP]
+    let thunderboltSwitches: [IOThunderboltSwitch]
     let usb3Transports: [USB3Transport]
     /// Authoritative connection state derived from the live IOKit watchers,
     /// passed in from the parent so we don't have to consult them from here
@@ -444,7 +444,7 @@ struct PortCard: View {
     let cioCapability: CIOCableCapability?
     let chargerWattageSource: ChargerWattageSource
 
-    @State private var reportingCable: PDIdentity?
+    @State private var reportingCable: USBPDSOP?
 
     var summary: PortSummary {
         PortSummary(
@@ -462,7 +462,7 @@ struct PortCard: View {
 
     /// Switches in the chain from this port's host root to the deepest
     /// connected device. Empty if the port doesn't map to any TB switch.
-    var thunderboltChain: [ThunderboltSwitch] {
+    var thunderboltChain: [IOThunderboltSwitch] {
         guard let socketID = ThunderboltTopology.socketID(fromServiceName: port.serviceName),
               let root = ThunderboltTopology.hostRoot(forSocketID: socketID, in: thunderboltSwitches) else {
             return []
@@ -470,7 +470,7 @@ struct PortCard: View {
         return ThunderboltTopology.chain(from: root, in: thunderboltSwitches)
     }
 
-    private var cableEmarker: PDIdentity? {
+    private var cableEmarker: USBPDSOP? {
         identities.first { $0.endpoint == .sopPrime || $0.endpoint == .sopDoublePrime }
     }
 
@@ -641,8 +641,8 @@ struct PowerSourceList: View {
 
 struct AdvancedPortDetails: View {
     let port: USBCPort
-    let cableEmarker: PDIdentity?
-    let thunderboltChain: [ThunderboltSwitch]
+    let cableEmarker: USBPDSOP?
+    let thunderboltChain: [IOThunderboltSwitch]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -759,7 +759,7 @@ struct ActiveCableVDO2Section: View {
 /// downstream lane port's link state for each hop. Hidden behind the
 /// existing "show technical details" toggle.
 struct ThunderboltFabricSection: View {
-    let chain: [ThunderboltSwitch]
+    let chain: [IOThunderboltSwitch]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -772,7 +772,7 @@ struct ThunderboltFabricSection: View {
     }
 
     @ViewBuilder
-    private func hopRow(_ sw: ThunderboltSwitch, index: Int) -> some View {
+    private func hopRow(_ sw: IOThunderboltSwitch, index: Int) -> some View {
         let indent = String(repeating: "  ", count: index)
         let arrow = index == 0 ? "" : "↳ "
         let name = sw.isHostRoot ? String(localized: "Host (\(sw.className))", bundle: _appLocalizedBundle) : ThunderboltLabels.deviceName(for: sw)

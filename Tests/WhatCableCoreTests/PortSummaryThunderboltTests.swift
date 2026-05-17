@@ -44,8 +44,8 @@ final class PortSummaryThunderboltTests: XCTestCase {
         socketID: String?,
         speed: LinkGeneration?,
         widthRaw: UInt8
-    ) -> ThunderboltPort {
-        ThunderboltPort(
+    ) -> IOThunderboltPort {
+        IOThunderboltPort(
             portNumber: portNumber,
             socketID: socketID,
             adapterType: .lane,
@@ -64,11 +64,11 @@ final class PortSummaryThunderboltTests: XCTestCase {
         upstreamPort: Int = 0,
         vendor: String,
         model: String,
-        ports: [ThunderboltPort]
-    ) -> ThunderboltSwitch {
-        ThunderboltSwitch(
+        ports: [IOThunderboltPort]
+    ) -> IOThunderboltSwitch {
+        IOThunderboltSwitch(
             id: uid,
-            className: "IOThunderboltSwitchType5",
+            className: "IOIOThunderboltSwitchType5",
             vendorID: 1452,
             vendorName: vendor,
             modelName: model,
@@ -244,13 +244,13 @@ final class PortSummaryThunderboltTests: XCTestCase {
     /// because their active components condition the Thunderbolt signal path,
     /// not the USB path. When the TB link is live and the e-marker says
     /// passive, PortSummary should add a clarifying note.
-    private func passiveCableIdentity() -> PDIdentity {
+    private func passiveCableIdentity() -> USBPDSOP {
         // ID Header VDO[0]: ufpProductType = 3 (passiveCable), VID = 0x2B1D
         let idHeader: UInt32 = (3 << 27) | 0x2B1D
         // Cable VDO[3]: USB 3.2 Gen 2 (speed=2), 5A current (bits 5..6 = 2),
         // latency = 1 (bits 13..16)
         let cableVDO: UInt32 = 0b010 | (2 << 5) | (1 << 13)
-        return PDIdentity(
+        return USBPDSOP(
             id: 99, endpoint: .sopPrime,
             parentPortType: 0, parentPortNumber: 0,
             vendorID: 0x2B1D, productID: 0x1901, bcdDevice: 0,
@@ -433,7 +433,7 @@ final class PortSummaryThunderboltTests: XCTestCase {
         // ID Header VDO[0]: ufpProductType = 4 (activeCable)
         let idHeader: UInt32 = (4 << 27) | 0x05AC
         let cableVDO: UInt32 = 0b011 | (2 << 5) | (1 << 13)
-        let cable = PDIdentity(
+        let cable = USBPDSOP(
             id: 99, endpoint: .sopPrime,
             parentPortType: 0, parentPortNumber: 0,
             vendorID: 0x05AC, productID: 0, bcdDevice: 0,

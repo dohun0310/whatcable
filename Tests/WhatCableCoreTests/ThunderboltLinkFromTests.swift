@@ -1,7 +1,7 @@
 import XCTest
 @testable import WhatCableCore
 
-/// Covers `ThunderboltSwitch.from(...)` and `ThunderboltPort.from(...)` —
+/// Covers `IOThunderboltSwitch.from(...)` and `IOThunderboltPort.from(...)` —
 /// the pure factories the watcher uses to turn raw IOKit property
 /// dictionaries into model values. Fixture dictionaries are transcribed
 /// from real `whatcable --tb-debug` paste-backs on issue #52, so the keys
@@ -177,9 +177,9 @@ final class ThunderboltLinkFromTests: XCTestCase {
     }
 
     func testSamsungSwitchParses() {
-        let model = ThunderboltSwitch.from(
+        let model = IOThunderboltSwitch.from(
             properties: samsungSwitch,
-            className: "IOThunderboltSwitchType3",
+            className: "IOIOThunderboltSwitchType3",
             ports: []
         )
         XCTAssertNotNil(model)
@@ -193,7 +193,7 @@ final class ThunderboltLinkFromTests: XCTestCase {
     }
 
     func testHostTb3PortParsesAsActiveTb3Link() {
-        let port = ThunderboltPort.from(properties: hostTb3Port)
+        let port = IOThunderboltPort.from(properties: hostTb3Port)
         XCTAssertNotNil(port)
         XCTAssertEqual(port?.adapterType, .lane)
         XCTAssertEqual(port?.socketID, "1")
@@ -273,7 +273,7 @@ final class ThunderboltLinkFromTests: XCTestCase {
     }
 
     func testHostUsb4PortDetectedAsTb4Class() {
-        let port = ThunderboltPort.from(properties: hostUsb4Port)
+        let port = IOThunderboltPort.from(properties: hostUsb4Port)
         XCTAssertEqual(port?.currentSpeed, .usb4Tb4)
         XCTAssertEqual(port?.perLaneGbps, 20)
         XCTAssertEqual(port?.txLanes, 2)
@@ -285,8 +285,8 @@ final class ThunderboltLinkFromTests: XCTestCase {
         // step-down to TB3 single-lane on the next leg". This test
         // confirms the model exposes everything a renderer needs to
         // produce that label. The renderer itself is Phase 3.
-        let usb4 = ThunderboltPort.from(properties: hostUsb4Port)
-        let tb3 = ThunderboltPort.from(properties: ts3PlusUpstreamPort)
+        let usb4 = IOThunderboltPort.from(properties: hostUsb4Port)
+        let tb3 = IOThunderboltPort.from(properties: ts3PlusUpstreamPort)
         XCTAssertEqual(usb4?.currentSpeed, .usb4Tb4)
         XCTAssertEqual(tb3?.currentSpeed, .tb3)
         // Per-lane Gbps drops on the second hop. Lane count also drops.
@@ -295,9 +295,9 @@ final class ThunderboltLinkFromTests: XCTestCase {
     }
 
     func testTs3PlusSwitchAtDepth2() {
-        let model = ThunderboltSwitch.from(
+        let model = IOThunderboltSwitch.from(
             properties: ts3PlusSwitch,
-            className: "IOThunderboltSwitchType3",
+            className: "IOIOThunderboltSwitchType3",
             ports: []
         )
         XCTAssertEqual(model?.depth, 2)
@@ -308,9 +308,9 @@ final class ThunderboltLinkFromTests: XCTestCase {
     func testAsusSwitchHandlesNegativeUid() {
         // Regression guard: IOKit reports some UIDs as signed Int64 with
         // the sign bit set. The model must store these without truncation.
-        let model = ThunderboltSwitch.from(
+        let model = IOThunderboltSwitch.from(
             properties: asusSwitch,
-            className: "IOThunderboltSwitchIntelJHL8440",
+            className: "IOIOThunderboltSwitchIntelJHL8440",
             ports: []
         )
         XCTAssertEqual(model?.id, -9185256489162756864)
@@ -328,7 +328,7 @@ final class ThunderboltLinkFromTests: XCTestCase {
             "Current Link Speed": NSNumber(value: 0),
             "Current Link Width": NSNumber(value: 0)
         ]
-        let port = ThunderboltPort.from(properties: dict)
+        let port = IOThunderboltPort.from(properties: dict)
         XCTAssertNil(port?.currentSpeed)
         XCTAssertEqual(port?.currentWidth?.isActive, false)
         XCTAssertFalse(port?.hasActiveLink ?? true)
@@ -343,7 +343,7 @@ final class ThunderboltLinkFromTests: XCTestCase {
             "Port Number": NSNumber(value: 3),
             "Link Bandwidth": NSNumber(value: 60)
         ]
-        let port = ThunderboltPort.from(properties: dict)
+        let port = IOThunderboltPort.from(properties: dict)
         XCTAssertEqual(port?.adapterType, .pcieDown)
         XCTAssertNil(port?.currentSpeed)
         XCTAssertNil(port?.currentWidth)
@@ -353,16 +353,16 @@ final class ThunderboltLinkFromTests: XCTestCase {
     // MARK: - Missing fields
 
     func testSwitchWithoutUidReturnsNil() {
-        let model = ThunderboltSwitch.from(
+        let model = IOThunderboltSwitch.from(
             properties: ["Vendor ID": NSNumber(value: 1)],
-            className: "IOThunderboltSwitchType7",
+            className: "IOIOThunderboltSwitchType7",
             ports: []
         )
         XCTAssertNil(model)
     }
 
     func testPortWithoutPortNumberReturnsNil() {
-        let port = ThunderboltPort.from(properties: ["Adapter Type": NSNumber(value: 1)])
+        let port = IOThunderboltPort.from(properties: ["Adapter Type": NSNumber(value: 1)])
         XCTAssertNil(port)
     }
 }

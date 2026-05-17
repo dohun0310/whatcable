@@ -80,7 +80,7 @@ struct WhatCableCLI {
           --json         Output as JSON instead of human-readable text
           --raw          Include raw IOKit properties for each port
           --report       Print a cable report (markdown + GitHub URL) and exit
-          --tb-debug     Dump the IOThunderboltSwitch tree (for contributors helping
+          --tb-debug     Dump the IOIOThunderboltSwitch tree (for contributors helping
                          us design the Thunderbolt fabric feature). See issue tracker.
           --version      Print version and exit
           -h, --help     Show this help and exit
@@ -225,7 +225,7 @@ private func timestampHeader() -> String {
     return "whatcable --watch · \(formatter.string(from: Date()))\n\n"
 }
 
-private func printCableReports(identities: [PDIdentity], cioCapabilities: [CIOCableCapability]) {
+private func printCableReports(identities: [USBPDSOP], cioCapabilities: [CIOCableCapability]) {
     let cables = identities.filter {
         $0.endpoint == .sopPrime || $0.endpoint == .sopDoublePrime
     }

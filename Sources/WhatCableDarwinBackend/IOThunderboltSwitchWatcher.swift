@@ -2,8 +2,8 @@ import Foundation
 import IOKit
 import WhatCableCore
 
-/// Watches `IOThunderboltSwitch` services and assembles them into a normalised
-/// list of `ThunderboltSwitch` models. Modelled on `USBCPortWatcher`:
+/// Watches `IOIOThunderboltSwitch` services and assembles them into a normalised
+/// list of `IOThunderboltSwitch` models. Modelled on `AppleHPMInterfaceWatcher`:
 ///
 /// - Match notification on the abstract parent class so all subclass variants
 ///   come in (we've seen `Type3`, `Type5`, `Type7`, `IntelJHL8440`, and
@@ -12,11 +12,11 @@ import WhatCableCore
 ///   moves, dock plug/unplug). Mirrors the USB-C watcher's pattern.
 /// - `refresh()` re-walks the registry; `read()`-style consumers can call it
 ///   on every snapshot read.
-/// - The factory in `WhatCableCore.ThunderboltSwitch.from(...)` does the
+/// - The factory in `WhatCableCore.IOThunderboltSwitch.from(...)` does the
 ///   actual property decoding so unit tests can run on hand-built dictionaries.
 @MainActor
-public final class ThunderboltWatcher: ObservableObject {
-    @Published public private(set) var switches: [ThunderboltSwitch] = []
+public final class IOIOThunderboltSwitchWatcher: ObservableObject {
+    @Published public private(set) var switches: [IOThunderboltSwitch] = []
 
     private var notifyPort: IONotificationPortRef?
     private var matchIterator: io_iterator_t = 0
@@ -32,11 +32,11 @@ public final class ThunderboltWatcher: ObservableObject {
 
         // C callback bridge: capture self via Unmanaged so the IOKit
         // notification machinery can call us back. Same pattern as
-        // USBCPortWatcher and PDIdentityWatcher.
+        // AppleHPMInterfaceWatcher and USBPDSOPWatcher.
         let selfPtr = Unmanaged.passUnretained(self).toOpaque()
         let cb: IOServiceMatchingCallback = { refcon, iterator in
             guard let refcon else { return }
-            let watcher = Unmanaged<ThunderboltWatcher>.fromOpaque(refcon).takeUnretainedValue()
+            let watcher = Unmanaged<IOIOThunderboltSwitchWatcher>.fromOpaque(refcon).takeUnretainedValue()
             Task { @MainActor in
                 // Drain the iterator so the kernel re-arms the notification,
                 // then do a full re-walk so we pick up parent linkage and
@@ -48,7 +48,7 @@ public final class ThunderboltWatcher: ObservableObject {
             }
         }
 
-        let matching = IOServiceMatching("IOThunderboltSwitch")
+        let matching = IOServiceMatching("IOIOThunderboltSwitch")
         var iter: io_iterator_t = 0
         if IOServiceAddMatchingNotification(
             port,
@@ -82,12 +82,12 @@ public final class ThunderboltWatcher: ObservableObject {
         switches.removeAll()
     }
 
-    /// Re-walk every `IOThunderboltSwitch` service. Cheap to call on every
-    /// snapshot read, mirroring `USBCPortWatcher.refresh()`. Property
+    /// Re-walk every `IOIOThunderboltSwitch` service. Cheap to call on every
+    /// snapshot read, mirroring `AppleHPMInterfaceWatcher.refresh()`. Property
     /// changes (link-state moves) tend to arrive via interest notifications
     /// but we don't rely on them for correctness.
     public func refresh() {
-        let matching = IOServiceMatching("IOThunderboltSwitch")
+        let matching = IOServiceMatching("IOIOThunderboltSwitch")
         var iter: io_iterator_t = 0
         guard IOServiceGetMatchingServices(kIOMainPortDefault, matching, &iter) == KERN_SUCCESS else {
             if !switches.isEmpty { switches = [] }
@@ -110,7 +110,7 @@ public final class ThunderboltWatcher: ObservableObject {
             let className: String
             let properties: [String: Any]
             let entryID: UInt64
-            let parentEntryID: UInt64  // 0 if no IOThunderboltSwitch parent
+            let parentEntryID: UInt64  // 0 if no IOIOThunderboltSwitch parent
         }
 
         var raw: [RawEntry] = []
@@ -138,7 +138,7 @@ public final class ThunderboltWatcher: ObservableObject {
             var entryID: UInt64 = 0
             IORegistryEntryGetRegistryEntryID(service, &entryID)
 
-            // Walk up to the nearest IOThunderboltSwitch ancestor (skipping
+            // Walk up to the nearest IOIOThunderboltSwitch ancestor (skipping
             // adapter / port intermediaries). On Apple Silicon, downstream
             // switches sit below their parent switch in the IOService plane,
             // so this gives us the parent linkage for free. We resolve the
@@ -164,7 +164,7 @@ public final class ThunderboltWatcher: ObservableObject {
             }
         }
 
-        var rebuilt: [ThunderboltSwitch] = []
+        var rebuilt: [IOThunderboltSwitch] = []
         rebuilt.reserveCapacity(raw.count)
 
         for entry in raw {
@@ -173,7 +173,7 @@ public final class ThunderboltWatcher: ObservableObject {
                 ? uidByEntryID[entry.parentEntryID]
                 : nil
 
-            if let model = ThunderboltSwitch.from(
+            if let model = IOThunderboltSwitch.from(
                 properties: entry.properties,
                 className: entry.className,
                 ports: ports,
@@ -197,8 +197,8 @@ public final class ThunderboltWatcher: ObservableObject {
     /// Walk port children of a switch service. Returns the parsed ports
     /// in registry order. Skips non-port children (driver shims sometimes
     /// hang off a switch service).
-    private func parsePorts(of switchService: io_service_t) -> [ThunderboltPort] {
-        var ports: [ThunderboltPort] = []
+    private func parsePorts(of switchService: io_service_t) -> [IOThunderboltPort] {
+        var ports: [IOThunderboltPort] = []
         var childIter: io_iterator_t = 0
         guard IORegistryEntryGetChildIterator(switchService, kIOServicePlane, &childIter) == KERN_SUCCESS else {
             return ports
@@ -222,7 +222,7 @@ public final class ThunderboltWatcher: ObservableObject {
                 continue
             }
 
-            if let port = ThunderboltPort.from(properties: dict) {
+            if let port = IOThunderboltPort.from(properties: dict) {
                 ports.append(port)
             }
         }
@@ -231,7 +231,7 @@ public final class ThunderboltWatcher: ObservableObject {
     }
 
     /// Walk up the IOService plane and return the registry entry ID of the
-    /// nearest ancestor whose class is an IOThunderboltSwitch. Returns `0`
+    /// nearest ancestor whose class is an IOIOThunderboltSwitch. Returns `0`
     /// if no such ancestor is found. The walker manages all IOKit handle
     /// lifetimes internally so callers don't have to track ownership.
     ///
@@ -259,7 +259,7 @@ public final class ThunderboltWatcher: ObservableObject {
                 let name = String(cString: classBuf)
                 // Match the abstract prefix; covers Type3 / Type5 / Type7 /
                 // IntelJHL8440 / IntelJHL9580 / future variants.
-                if name.hasPrefix("IOThunderboltSwitch") {
+                if name.hasPrefix("IOIOThunderboltSwitch") {
                     var entryID: UInt64 = 0
                     if IORegistryEntryGetRegistryEntryID(current, &entryID) == KERN_SUCCESS {
                         return entryID
@@ -274,13 +274,13 @@ public final class ThunderboltWatcher: ObservableObject {
     /// Subscribe to property changes on a switch service. Apple's IOKit
     /// fires `kIOMessageServicePropertyChange` when link state moves
     /// (e.g. dock cable plugged), so this gives us a refresh trigger
-    /// without polling. Same pattern as `USBCPortWatcher.registerInterest`.
+    /// without polling. Same pattern as `AppleHPMInterfaceWatcher.registerInterest`.
     private func registerInterest(for service: io_service_t, entryID: UInt64) {
         guard let notifyPort, interestNotifications[entryID] == nil else { return }
         let selfPtr = Unmanaged.passUnretained(self).toOpaque()
         let cb: IOServiceInterestCallback = { refcon, _, _, _ in
             guard let refcon else { return }
-            let watcher = Unmanaged<ThunderboltWatcher>.fromOpaque(refcon).takeUnretainedValue()
+            let watcher = Unmanaged<IOIOThunderboltSwitchWatcher>.fromOpaque(refcon).takeUnretainedValue()
             Task { @MainActor in watcher.refresh() }
         }
         var notification: io_object_t = 0

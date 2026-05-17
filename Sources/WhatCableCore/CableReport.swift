@@ -46,7 +46,7 @@ public enum CableReport {
         /// information; many reputable cables ship without certification.
         public let usbifCertID: UInt32?
 
-        public init(identity: PDIdentity) {
+        public init(identity: USBPDSOP) {
             self.vendorID = identity.vendorID
             self.productID = identity.productID
             self.vendorIDHex = String(format: "0x%04X", identity.vendorID)
@@ -109,7 +109,7 @@ public enum CableReport {
     /// Build a payload from a cable e-marker identity. Returns nil if the
     /// identity isn't a cable endpoint (SOP' / SOP'').
     public static func payload(
-        for identity: PDIdentity,
+        for identity: USBPDSOP,
         includeSystemInfo: Bool = false,
         appVersion: String = AppInfo.version,
         cioCapability: CIOCableCapability? = nil

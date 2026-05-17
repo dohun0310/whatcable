@@ -146,8 +146,8 @@ private func makeLanePort(
     socketID: String? = nil,
     speed: LinkGeneration?,
     widthRaw: UInt8
-) -> ThunderboltPort {
-    ThunderboltPort(
+) -> IOThunderboltPort {
+    IOThunderboltPort(
         portNumber: portNumber,
         socketID: socketID,
         adapterType: .lane,
@@ -166,11 +166,11 @@ private func makeSwitch(
     upstreamPortNumber: Int = 0,
     vendor: String = "Apple Inc.",
     model: String = "iOS",
-    ports: [ThunderboltPort] = []
-) -> ThunderboltSwitch {
-    ThunderboltSwitch(
+    ports: [IOThunderboltPort] = []
+) -> IOThunderboltSwitch {
+    IOThunderboltSwitch(
         id: uid,
-        className: "IOThunderboltSwitchType7",
+        className: "IOIOThunderboltSwitchType7",
         vendorID: 1452,
         vendorName: vendor,
         modelName: model,

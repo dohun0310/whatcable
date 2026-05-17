@@ -47,6 +47,14 @@ public struct AdapterInfo: Hashable, Sendable {
     /// The charger's HVC (High Voltage Charging) menu: all voltage/current
     /// combos the charger says it can deliver. Empty when not available.
     public let hvcMenu: [AdapterHVCEntry]
+    /// Index into hvcMenu indicating the currently active PDO step.
+    public let hvcActiveIndex: Int?
+    /// Charger family code from Apple's internal classification.
+    public let familyCode: Int?
+    /// Unique adapter identifier.
+    public let adapterID: Int?
+    /// PMU (Power Management Unit) configuration value.
+    public let pmuConfiguration: Int?
 
     public init(
         watts: Int?,
@@ -57,7 +65,11 @@ public struct AdapterInfo: Hashable, Sendable {
         adapterDescription: String? = nil,
         powerTier: Int? = nil,
         isWireless: Bool? = nil,
-        hvcMenu: [AdapterHVCEntry] = []
+        hvcMenu: [AdapterHVCEntry] = [],
+        hvcActiveIndex: Int? = nil,
+        familyCode: Int? = nil,
+        adapterID: Int? = nil,
+        pmuConfiguration: Int? = nil
     ) {
         self.watts = watts
         self.isCharging = isCharging
@@ -68,23 +80,27 @@ public struct AdapterInfo: Hashable, Sendable {
         self.powerTier = powerTier
         self.isWireless = isWireless
         self.hvcMenu = hvcMenu
+        self.hvcActiveIndex = hvcActiveIndex
+        self.familyCode = familyCode
+        self.adapterID = adapterID
+        self.pmuConfiguration = pmuConfiguration
     }
 }
 
 /// One unified view of cable / port / power state at a point in time.
 /// Backends produce these; CLI and GUI consume them.
-// TODO: Sendable — requires USBCPort, PowerSource, PDIdentity, USBDevice to conform first
+// TODO: Sendable — requires USBCPort, PowerSource, USBPDSOP, USBDevice to conform first
 public struct CableSnapshot: Equatable {
     public let ports: [USBCPort]
     public let powerSources: [PowerSource]
-    public let identities: [PDIdentity]
+    public let identities: [USBPDSOP]
     public let usbDevices: [USBDevice]
     public let adapter: AdapterInfo?
     /// Top-level array of every Thunderbolt switch the host can see. Empty
     /// on machines without a Thunderbolt controller, or when IOKit returns
     /// nothing (the JSON shape adds the key but with an empty array, so
     /// downstream consumers can rely on the field always being present).
-    public let thunderboltSwitches: [ThunderboltSwitch]
+    public let thunderboltSwitches: [IOThunderboltSwitch]
     /// True on desktop Macs (Mac Studio, Mac Mini, Mac Pro) where the
     /// AppleSmartBattery node is absent or reports BatteryInstalled=false.
     /// Per-port PD diagnostics from the battery controller are unavailable.
@@ -104,19 +120,24 @@ public struct CableSnapshot: Equatable {
     /// Independent of USB-PD e-marker data. Present only while a
     /// Thunderbolt link is active.
     public let cioCapabilities: [CIOCableCapability]
+    /// Per-port physical layer state from the TypeC PHY controller. Shows
+    /// per-lane transport mode (CIO/DisplayPort/idle), USB2 state, and DP
+    /// pixel clock. One entry per physical USB-C port.
+    public let typeCPhys: [TypeCPhy]
 
     public init(
         ports: [USBCPort],
         powerSources: [PowerSource],
-        identities: [PDIdentity],
+        identities: [USBPDSOP],
         usbDevices: [USBDevice],
         adapter: AdapterInfo?,
-        thunderboltSwitches: [ThunderboltSwitch] = [],
+        thunderboltSwitches: [IOThunderboltSwitch] = [],
         isDesktopMac: Bool = false,
         federatedIdentities: [FederatedIdentity] = [],
         usb3Transports: [USB3Transport] = [],
         trmTransports: [TRMTransport] = [],
-        cioCapabilities: [CIOCableCapability] = []
+        cioCapabilities: [CIOCableCapability] = [],
+        typeCPhys: [TypeCPhy] = []
     ) {
         self.ports = ports
         self.powerSources = powerSources
@@ -129,6 +150,7 @@ public struct CableSnapshot: Equatable {
         self.usb3Transports = usb3Transports
         self.trmTransports = trmTransports
         self.cioCapabilities = cioCapabilities
+        self.typeCPhys = typeCPhys
     }
 }
 

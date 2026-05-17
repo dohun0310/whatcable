@@ -8,7 +8,7 @@ import WhatCableCore
 /// `snapshot()` starts the watchers once, refreshes the polling-driven ones
 /// (the others fire IOKit match notifications during start), and reads.
 /// `watch()` keeps them started and polls for changes on a 1s timer.
-/// Polling is sufficient because `USBCPortWatcher` already requires it for
+/// Polling is sufficient because `AppleHPMInterfaceWatcher` already requires it for
 /// property-change events; the others share the same loop for simplicity.
 public final class DarwinSnapshotProvider: CableSnapshotProvider, @unchecked Sendable {
     public init() {}
@@ -17,13 +17,14 @@ public final class DarwinSnapshotProvider: CableSnapshotProvider, @unchecked Sen
 
     @MainActor
     private final class State {
-        let portWatcher = USBCPortWatcher()
+        let portWatcher = AppleHPMInterfaceWatcher()
         let powerWatcher = PowerSourceWatcher()
-        let pdWatcher = PDIdentityWatcher()
+        let pdWatcher = USBPDSOPWatcher()
         let usbWatcher = USBWatcher()
-        let tbWatcher = ThunderboltWatcher()
+        let tbWatcher = IOIOThunderboltSwitchWatcher()
         let usb3Watcher = USB3TransportWatcher()
         let trmWatcher = TRMTransportWatcher()
+        let phyWatcher = AppleTypeCPhyWatcher()
         var started = false
 
         func ensureStarted() {
@@ -35,6 +36,7 @@ public final class DarwinSnapshotProvider: CableSnapshotProvider, @unchecked Sen
             tbWatcher.start()
             usb3Watcher.start()
             trmWatcher.start()
+            phyWatcher.start()
             started = true
         }
 
@@ -48,7 +50,8 @@ public final class DarwinSnapshotProvider: CableSnapshotProvider, @unchecked Sen
             tbWatcher.refresh()
             usb3Watcher.refresh()
             trmWatcher.refresh()
-            let battery = SmartBatteryReader.read()
+            phyWatcher.refresh()
+            let battery = AppleSmartBatteryReader.read()
             let snap = CableSnapshot(
                 ports: portWatcher.ports,
                 powerSources: powerWatcher.sources,
@@ -60,7 +63,8 @@ public final class DarwinSnapshotProvider: CableSnapshotProvider, @unchecked Sen
                 federatedIdentities: battery.federatedIdentities,
                 usb3Transports: usb3Watcher.transports,
                 trmTransports: trmWatcher.transports,
-                cioCapabilities: trmWatcher.cioCapabilities
+                cioCapabilities: trmWatcher.cioCapabilities,
+                typeCPhys: phyWatcher.phys
             )
             DarwinSnapshotProvider.logChargingSignals(snap)
             return snap

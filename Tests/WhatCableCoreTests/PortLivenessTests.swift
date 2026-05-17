@@ -45,8 +45,8 @@ final class PortLivenessTests: XCTestCase {
         )
     }
 
-    private func partnerIdentity() -> PDIdentity {
-        PDIdentity(
+    private func partnerIdentity() -> USBPDSOP {
+        USBPDSOP(
             id: 99, endpoint: .sop,
             parentPortType: 0, parentPortNumber: 0,
             vendorID: 0, productID: 0, bcdDevice: 0,
@@ -79,7 +79,7 @@ final class PortLivenessTests: XCTestCase {
         ))
     }
 
-    func testPDIdentityMakesPortLive() {
+    func testUSBPDSOPMakesPortLive() {
         XCTAssertTrue(isPortLive(
             port: usbCPort(connectionActive: false),
             powerSources: [], identities: [partnerIdentity()], matchingDevices: []

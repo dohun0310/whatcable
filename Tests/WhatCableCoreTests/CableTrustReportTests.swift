@@ -11,10 +11,10 @@ final class CableTrustReportTests: XCTestCase {
     /// Build a synthetic SOP' identity. `cableVDO` is the raw VDO[3].
     private func cableIdentity(
         vendorID: Int = 0x05AC,
-        endpoint: PDIdentity.Endpoint = .sopPrime,
+        endpoint: USBPDSOP.Endpoint = .sopPrime,
         cableVDO: UInt32 = (0b10 << 5) | 0b011 | (1 << 13) // USB4 Gen 3, 5A, ~1m
-    ) -> PDIdentity {
-        PDIdentity(
+    ) -> USBPDSOP {
+        USBPDSOP(
             id: 1,
             endpoint: endpoint,
             parentPortType: 0,
@@ -86,7 +86,7 @@ final class CableTrustReportTests: XCTestCase {
     func testActiveCableLatencyOpticalRangeIsValid() {
         // Build an active-cable identity. ufpProductType bits 29..27 = 100 = 4 (active).
         // Latency 1010 = ~2000 ns optical. Should not flag.
-        let activeIdentity = PDIdentity(
+        let activeIdentity = USBPDSOP(
             id: 1,
             endpoint: .sopPrime,
             parentPortType: 0,

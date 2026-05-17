@@ -63,7 +63,7 @@ final class ChargingDiagnosticTests: XCTestCase {
 
     /// Build a cable e-marker identity advertising the given watt rating.
     /// We pin watts via maxV/current bits: 5A @ 20V = 100W, 3A @ 20V = 60W.
-    private func cableIdentity(watts: Int) -> PDIdentity {
+    private func cableIdentity(watts: Int) -> USBPDSOP {
         // Latency = 0001 (~10 ns / ~1 m). Real cables emit a non-zero
         // latency; using 0 here would make every fixture trip the
         // reservedCableLatencyEncoding warning even though these tests
@@ -80,7 +80,7 @@ final class ChargingDiagnosticTests: XCTestCase {
         // ID header: ufpProductType = 3 (passive cable), bits 29..27 = 011
         let idHeader: UInt32 = 0x1800_0000
         // VDO[3] holds the cable VDO; pad indices 1 and 2 with zero.
-        return PDIdentity(
+        return USBPDSOP(
             id: 2, endpoint: .sopPrime,
             parentPortType: 2, parentPortNumber: 1,
             vendorID: 0, productID: 0, bcdDevice: 0,

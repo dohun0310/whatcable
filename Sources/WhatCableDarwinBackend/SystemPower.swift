@@ -45,6 +45,11 @@ public enum SystemPower {
             }
         }()
 
+        let hvcIndex = (info["UsbHvcHvcIndex"] as? NSNumber)?.intValue
+        let familyCode = (info["FamilyCode"] as? NSNumber)?.intValue
+        let adapterID = (info["AdapterID"] as? NSNumber)?.intValue
+        let pmuConfig = (info["PMUConfiguration"] as? NSNumber)?.intValue
+
         return AdapterInfo(
             watts: w,
             isCharging: nil,
@@ -54,7 +59,11 @@ public enum SystemPower {
             adapterDescription: desc,
             powerTier: tier,
             isWireless: wireless,
-            hvcMenu: hvcMenu
+            hvcMenu: hvcMenu,
+            hvcActiveIndex: hvcIndex,
+            familyCode: familyCode,
+            adapterID: adapterID,
+            pmuConfiguration: pmuConfig
         )
     }
 }
@@ -66,7 +75,7 @@ extension ChargingDiagnostic {
     public init?(
         port: USBCPort,
         sources: [PowerSource],
-        identities: [PDIdentity]
+        identities: [USBPDSOP]
     ) {
         self.init(
             port: port,

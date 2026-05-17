@@ -5,7 +5,7 @@ import WhatCableCore
 /// Reads AppleSmartBattery properties from IOKit. Desktop Macs have no
 /// AppleSmartBattery service at all, or report BatteryInstalled = false.
 /// Laptops expose FedDetails (federated per-port PD identity).
-public enum SmartBatteryReader {
+public enum AppleSmartBatteryReader {
     public struct Result {
         public let isDesktopMac: Bool
         public let federatedIdentities: [FederatedIdentity]

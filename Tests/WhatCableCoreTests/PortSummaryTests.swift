@@ -156,7 +156,7 @@ final class PortSummaryTests: XCTestCase {
 
     func testEmarkerCableProducesEmarkerBullet() {
         let port = makePort(active: ["USB3"], superSpeed: true)
-        let cable = PDIdentity(
+        let cable = USBPDSOP(
             id: 99, endpoint: .sopPrime,
             parentPortType: 0, parentPortNumber: 0,
             vendorID: 0, productID: 0, bcdDevice: 0,
@@ -249,7 +249,7 @@ final class PortSummaryTests: XCTestCase {
             supported: ["CC", "USB2", "USB3"],
             superSpeed: true
         )
-        let cable = PDIdentity(
+        let cable = USBPDSOP(
             id: 99, endpoint: .sopPrime,
             parentPortType: 0, parentPortNumber: 0,
             vendorID: 0, productID: 0, bcdDevice: 0,
@@ -276,9 +276,9 @@ final class PortSummaryTests: XCTestCase {
     /// Helper: build an SOP' cable identity with the given current bits.
     /// Uses USB4 Gen 3 (3) as the speed baseline and a valid latency.
     /// `currentBits = 1` => 3A (60W); `currentBits = 2` => 5A (100W).
-    private func cableIdentity(currentBits: Int) -> PDIdentity {
+    private func cableIdentity(currentBits: Int) -> USBPDSOP {
         let vdo: UInt32 = UInt32(0b011) | UInt32(currentBits << 5) | UInt32(1 << 13)
-        return PDIdentity(
+        return USBPDSOP(
             id: 99, endpoint: .sopPrime,
             parentPortType: 2, parentPortNumber: 1,
             vendorID: 0x05AC, productID: 0, bcdDevice: 0,
@@ -343,7 +343,7 @@ final class PortSummaryTests: XCTestCase {
     /// blocks should fail this test.
     func testBulletsAreGroupedLinkThenCableThenPower() {
         let port = makePort(active: ["USB3"], superSpeed: true)
-        let cable = PDIdentity(
+        let cable = USBPDSOP(
             id: 99, endpoint: .sopPrime,
             parentPortType: 2, parentPortNumber: 1,
             vendorID: 0x05AC, productID: 0, bcdDevice: 0,
@@ -355,7 +355,7 @@ final class PortSummaryTests: XCTestCase {
             ],
             specRevision: 3
         )
-        let partner = PDIdentity(
+        let partner = USBPDSOP(
             id: 100, endpoint: .sop,
             parentPortType: 2, parentPortNumber: 1,
             vendorID: 0x05AC, productID: 0, bcdDevice: 0,
@@ -453,7 +453,7 @@ final class PortSummaryTests: XCTestCase {
 
     func testPartnerBulletIncludesPDRevision() {
         let port = makePort(active: ["USB3"], supported: ["CC"], superSpeed: true)
-        let partner = PDIdentity(
+        let partner = USBPDSOP(
             id: 50, endpoint: .sop,
             parentPortType: 2, parentPortNumber: 1,
             vendorID: 0x05AC, productID: 0x1234, bcdDevice: 0,
@@ -467,7 +467,7 @@ final class PortSummaryTests: XCTestCase {
 
     func testPartnerBulletOmitsPDRevisionWhenZero() {
         let port = makePort(active: ["USB3"], supported: ["CC"], superSpeed: true)
-        let partner = PDIdentity(
+        let partner = USBPDSOP(
             id: 50, endpoint: .sop,
             parentPortType: 2, parentPortNumber: 1,
             vendorID: 0x05AC, productID: 0x1234, bcdDevice: 0,
@@ -487,7 +487,7 @@ final class PortSummaryTests: XCTestCase {
         // bullet should appear because we know something is on the
         // other end.
         let port = makePort(connected: true, active: [], supported: ["CC"])
-        let partner = PDIdentity(
+        let partner = USBPDSOP(
             id: 50, endpoint: .sop,
             parentPortType: 2, parentPortNumber: 1,
             vendorID: 0x05AC, productID: 0x1234, bcdDevice: 0,
@@ -807,7 +807,7 @@ final class PortSummaryTests: XCTestCase {
     /// Pins the exact output so we can verify any future labelling changes.
     func testIssue131AppleTB5CableOnCIOPort() {
         let vdos: [UInt32] = [0x1C60_05AC, 0x0000_0000, 0x720A_0100, 0x110A_2644]
-        let cable = PDIdentity(
+        let cable = USBPDSOP(
             id: 99, endpoint: .sopPrime,
             parentPortType: 2, parentPortNumber: 1,
             vendorID: 0x05AC, productID: 0x720A, bcdDevice: 0x0100,

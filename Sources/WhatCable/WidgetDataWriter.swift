@@ -29,11 +29,11 @@ final class WidgetDataWriter {
     )
 
     // Own watcher instances, independent of the UI's watchers.
-    private let portWatcher = USBCPortWatcher()
+    private let portWatcher = AppleHPMInterfaceWatcher()
     private let deviceWatcher = USBWatcher()
     private let powerWatcher = PowerSourceWatcher()
-    private let pdWatcher = PDIdentityWatcher()
-    private let tbWatcher = ThunderboltWatcher()
+    private let pdWatcher = USBPDSOPWatcher()
+    private let tbWatcher = IOIOThunderboltSwitchWatcher()
     private let usb3Watcher = USB3TransportWatcher()
     private let trmWatcher = TRMTransportWatcher()
 

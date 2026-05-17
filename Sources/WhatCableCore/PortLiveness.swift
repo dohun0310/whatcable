@@ -20,7 +20,7 @@ import Foundation
 public func isPortLive(
     port: USBCPort,
     powerSources: [PowerSource],
-    identities: [PDIdentity],
+    identities: [USBPDSOP],
     matchingDevices: [USBDevice]
 ) -> Bool {
     if !matchingDevices.isEmpty { return true }

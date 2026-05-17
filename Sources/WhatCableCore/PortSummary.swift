@@ -39,9 +39,9 @@ extension PortSummary {
     public init(
         port: USBCPort,
         sources: [PowerSource] = [],
-        identities: [PDIdentity] = [],
+        identities: [USBPDSOP] = [],
         devices: [USBDevice] = [],
-        thunderboltSwitches: [ThunderboltSwitch] = [],
+        thunderboltSwitches: [IOThunderboltSwitch] = [],
         federatedIdentities: [FederatedIdentity] = [],
         usb3Transports: [USB3Transport] = [],
         cioCapability: CIOCableCapability? = nil,
@@ -62,7 +62,7 @@ extension PortSummary {
         // them wrongly blames the cable. See issue #50.
         let pdCapable = supported.contains("CC")
         // E-marker presence is "did the cable respond to Discover Identity?",
-        // which means we have an SOP'/SOP'' PDIdentity for this port. The
+        // which means we have an SOP'/SOP'' USBPDSOP for this port. The
         // port's `ActiveCable` IOKit flag means "this cable contains active
         // signal-conditioning electronics", which is unrelated: passive
         // cables (including high-end USB4 / 240W EPR cables) carry e-markers
@@ -379,7 +379,7 @@ extension PortSummary {
 /// in that case.
 private func thunderboltBullets(
     for port: USBCPort,
-    switches: [ThunderboltSwitch]
+    switches: [IOThunderboltSwitch]
 ) -> [String] {
     guard !switches.isEmpty,
           let socketID = ThunderboltTopology.socketID(fromServiceName: port.serviceName),
@@ -438,7 +438,7 @@ private func thunderboltBullets(
 /// If the last-leg link is slower than the host link (per-lane Gbps drop
 /// or lane count drop), describe the change. Returns nil for symmetric
 /// chains where every leg matches.
-private func stepDownLabel(host: ThunderboltPort, lastLeg: ThunderboltPort) -> String? {
+private func stepDownLabel(host: IOThunderboltPort, lastLeg: IOThunderboltPort) -> String? {
     guard let hostLabel = ThunderboltLabels.linkLabel(for: host),
           let lastLabel = ThunderboltLabels.linkLabel(for: lastLeg) else {
         return nil

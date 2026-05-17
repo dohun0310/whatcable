@@ -201,8 +201,8 @@ final class JSONFormatterTests: XCTestCase {
 
     // MARK: - Trust flags
 
-    private func cableIdentity(vendorID: Int, cableVDO: UInt32) -> PDIdentity {
-        PDIdentity(
+    private func cableIdentity(vendorID: Int, cableVDO: UInt32) -> USBPDSOP {
+        USBPDSOP(
             id: 1,
             endpoint: .sopPrime,
             parentPortType: 2,
@@ -280,11 +280,11 @@ final class JSONFormatterTests: XCTestCase {
 
     // MARK: - Active Cable VDO 2 surfacing
 
-    private func activeCableIdentity(vdo4: UInt32, vendorID: Int = 0x05AC) -> PDIdentity {
+    private func activeCableIdentity(vdo4: UInt32, vendorID: Int = 0x05AC) -> USBPDSOP {
         // Active cable: ufpProductType bits 29..27 = 100 = 4.
         // Cable VDO with valid active termination + USB4 Gen3 + 5A + valid latency.
         let cableVDO: UInt32 = UInt32(0b011) | UInt32(2 << 5) | Self.validLatency | UInt32(0b10 << 11)
-        return PDIdentity(
+        return USBPDSOP(
             id: 1,
             endpoint: .sopPrime,
             parentPortType: 2,
@@ -421,7 +421,7 @@ final class JSONFormatterTests: XCTestCase {
     /// level, even when the host has no Thunderbolt controller. The
     /// docstring on `CableSnapshot.thunderboltSwitches` advertises this
     /// to downstream consumers.
-    func testThunderboltSwitchesKeyPresentEvenWhenEmpty() throws {
+    func testIOThunderboltSwitchesKeyPresentEvenWhenEmpty() throws {
         let json = try JSONFormatter.render(
             ports: [makePort(connected: false)], sources: [], identities: [], showRaw: false
         )
@@ -430,10 +430,10 @@ final class JSONFormatterTests: XCTestCase {
         XCTAssertEqual((obj["thunderboltSwitches"] as? [Any])?.count, 0)
     }
 
-    func testThunderboltSwitchesEncodedAtTopLevel() throws {
-        let host = ThunderboltSwitch(
+    func testIOThunderboltSwitchesEncodedAtTopLevel() throws {
+        let host = IOThunderboltSwitch(
             id: 408750268121704800,
-            className: "IOThunderboltSwitchType5",
+            className: "IOIOThunderboltSwitchType5",
             vendorID: 1452,
             vendorName: "Apple Inc.",
             modelName: "iOS",
@@ -444,7 +444,7 @@ final class JSONFormatterTests: XCTestCase {
             maxPortNumber: 8,
             supportedSpeed: SupportedSpeedMask(rawValue: 12),
             ports: [
-                ThunderboltPort(
+                IOThunderboltPort(
                     portNumber: 1,
                     socketID: "1",
                     adapterType: .lane,
@@ -485,14 +485,14 @@ final class JSONFormatterTests: XCTestCase {
     /// sample on issue #52, so JSON consumers now get `generation == "tb5"`
     /// alongside the per-lane label and the raw speed code.
     func testTb5JsonGenerationLabelIsConfirmed() throws {
-        let host = ThunderboltSwitch(
-            id: 1, className: "IOThunderboltSwitchType9",
+        let host = IOThunderboltSwitch(
+            id: 1, className: "IOIOThunderboltSwitchType9",
             vendorID: 1452, vendorName: "Apple Inc.", modelName: "iOS",
             routerID: 0, depth: 0, routeString: 0,
             upstreamPortNumber: 7, maxPortNumber: 8,
             supportedSpeed: SupportedSpeedMask(rawValue: 14),
             ports: [
-                ThunderboltPort(
+                IOThunderboltPort(
                     portNumber: 1, socketID: "1", adapterType: .lane,
                     currentSpeed: .tb5,
                     currentWidth: LinkWidth(rawValue: 0x2),
@@ -715,16 +715,16 @@ final class JSONFormatterTests: XCTestCase {
         XCTAssertNil(dto["hvcMenu"] as? [[String: Any]])
     }
 
-    func testPortDtoCarriesThunderboltSwitchUidReference() throws {
-        let host = ThunderboltSwitch(
+    func testPortDtoCarriesIOThunderboltSwitchUidReference() throws {
+        let host = IOThunderboltSwitch(
             id: 12345,
-            className: "IOThunderboltSwitchType5",
+            className: "IOIOThunderboltSwitchType5",
             vendorID: 1452, vendorName: "Apple Inc.", modelName: "iOS",
             routerID: 0, depth: 0, routeString: 0,
             upstreamPortNumber: 7, maxPortNumber: 8,
             supportedSpeed: SupportedSpeedMask(rawValue: 12),
             ports: [
-                ThunderboltPort(
+                IOThunderboltPort(
                     portNumber: 1, socketID: "1", adapterType: .lane,
                     currentSpeed: .usb4Tb4,
                     currentWidth: LinkWidth(rawValue: 0x2),

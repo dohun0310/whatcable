@@ -26,6 +26,14 @@ public struct USBCPort: Identifiable, Hashable {
     public let powerCurrentLimits: [Int]
     public let firmwareVersion: String?
     public let bootFlagsHex: String?
+    /// Liquid detection state from the HPM controller. "Idle" means clear.
+    public let ldcmStateDescription: String?
+    /// Active features reported by the HPM controller (e.g. ["TRM", "LDCM", "Power In"]).
+    public let featuresEnabled: [String]
+    /// Current power mode from IOAccessoryPowerMode.
+    public let accessoryPowerMode: Int?
+    /// Active power mode from IOAccessoryActivePowerMode.
+    public let accessoryActivePowerMode: Int?
     /// Index of the XHCI controller serving this physical port, derived from
     /// the `hpmN@…` ancestor in the IOKit parent chain on M3+ machines.
     /// Pairs with `USBDevice.busIndex` for device-to-port matching. `nil`
@@ -82,6 +90,10 @@ public struct USBCPort: Identifiable, Hashable {
             powerCurrentLimits: intArrayProperty(properties["IOAccessoryPowerCurrentLimits"]),
             firmwareVersion: hexDataProperty(properties["FW Version"]),
             bootFlagsHex: hexDataProperty(properties["Boot Flags"]),
+            ldcmStateDescription: properties["LDCM_StateDescription"] as? String,
+            featuresEnabled: stringArrayProperty(properties["FeaturesEnabled"]),
+            accessoryPowerMode: (properties["IOAccessoryPowerMode"] as? NSNumber)?.intValue,
+            accessoryActivePowerMode: (properties["IOAccessoryActivePowerMode"] as? NSNumber)?.intValue,
             busIndex: busIndex,
             rawProperties: raw
         )
@@ -113,6 +125,10 @@ public struct USBCPort: Identifiable, Hashable {
         powerCurrentLimits: [Int],
         firmwareVersion: String?,
         bootFlagsHex: String?,
+        ldcmStateDescription: String? = nil,
+        featuresEnabled: [String] = [],
+        accessoryPowerMode: Int? = nil,
+        accessoryActivePowerMode: Int? = nil,
         busIndex: Int? = nil,
         rawProperties: [String: String]
     ) {
@@ -141,6 +157,10 @@ public struct USBCPort: Identifiable, Hashable {
         self.powerCurrentLimits = powerCurrentLimits
         self.firmwareVersion = firmwareVersion
         self.bootFlagsHex = bootFlagsHex
+        self.ldcmStateDescription = ldcmStateDescription
+        self.featuresEnabled = featuresEnabled
+        self.accessoryPowerMode = accessoryPowerMode
+        self.accessoryActivePowerMode = accessoryActivePowerMode
         self.busIndex = busIndex
         self.rawProperties = rawProperties
     }

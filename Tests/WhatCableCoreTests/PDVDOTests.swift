@@ -429,7 +429,7 @@ final class PDVDOTests: XCTestCase {
     func testActiveCableVDO2AccessorRequiresActiveCable() {
         // Passive cable (ufpProductType=3) shouldn't expose VDO2 even if
         // vdos[4] is present.
-        let passive = PDIdentity(
+        let passive = USBPDSOP(
             id: 1,
             endpoint: .sopPrime,
             parentPortType: 2,
@@ -453,7 +453,7 @@ final class PDVDOTests: XCTestCase {
         // Active cable (ufpProductType=4) with five VDOs.
         let vdo3: UInt32 = UInt32(0b011) | UInt32(2 << 5) | (1 << 13) | (UInt32(0b10) << 11) // valid active termination
         let vdo4: UInt32 = (1 << 10) | (1 << 9) | (1 << 2) // optical, re-timer, isolated
-        let active = PDIdentity(
+        let active = USBPDSOP(
             id: 1,
             endpoint: .sopPrime,
             parentPortType: 2,
@@ -479,7 +479,7 @@ final class PDVDOTests: XCTestCase {
 
     func testActiveCableVDO2AccessorReturnsNilWhenVDO4Missing() {
         // Active cable but only 4 VDOs (no VDO2 present).
-        let active = PDIdentity(
+        let active = USBPDSOP(
             id: 1,
             endpoint: .sopPrime,
             parentPortType: 2,

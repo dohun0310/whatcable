@@ -6,7 +6,7 @@ final class CableReportTests: XCTestCase {
     private func cableIdentity(
         vendorID: Int = 0x05AC,
         productID: Int = 0x1234,
-        endpoint: PDIdentity.Endpoint = .sopPrime,
+        endpoint: USBPDSOP.Endpoint = .sopPrime,
         vdos: [UInt32] = [
             // ID Header VDO: passive cable from VID 0x05AC
             (3 << 27) | UInt32(0x05AC),
@@ -18,8 +18,8 @@ final class CableReportTests: XCTestCase {
             // tests aren't about trust signals.
             (0b10 << 5) | 0b011 | (1 << 13)
         ]
-    ) -> PDIdentity {
-        PDIdentity(
+    ) -> USBPDSOP {
+        USBPDSOP(
             id: 1,
             endpoint: endpoint,
             parentPortType: 0,
@@ -119,7 +119,7 @@ final class CableReportTests: XCTestCase {
     func testMarkdownOmitsRawVDOSectionWhenAbsent() {
         // Identity with no VDOs (e.g. a cable that didn't respond to
         // Discover Identity at all) shouldn't render an empty Raw VDOs table.
-        let id = PDIdentity(
+        let id = USBPDSOP(
             id: 1,
             endpoint: .sopPrime,
             parentPortType: 0,
@@ -138,7 +138,7 @@ final class CableReportTests: XCTestCase {
     // MARK: - USB-IF certification ID (from Cert Stat VDO)
 
     func testUSBIFCertIDPresentWhenNonZero() {
-        let id = PDIdentity(
+        let id = USBPDSOP(
             id: 1,
             endpoint: .sopPrime,
             parentPortType: 0,
@@ -176,7 +176,7 @@ final class CableReportTests: XCTestCase {
         // Cert Stat. The fingerprint should record that explicitly,
         // not flatten it to "XID = 0", so calibration data stays
         // faithful to what the cable actually reported.
-        let id = PDIdentity(
+        let id = USBPDSOP(
             id: 1,
             endpoint: .sopPrime,
             parentPortType: 0,
@@ -286,7 +286,7 @@ final class CableReportTests: XCTestCase {
         // PD response can include up to 7 VDOs (ID Header + Cert Stat +
         // Product + up to 4 Product Type VDOs). Anything past index 3 we
         // label "Other" rather than guessing.
-        let id = PDIdentity(
+        let id = USBPDSOP(
             id: 1,
             endpoint: .sopPrime,
             parentPortType: 0,

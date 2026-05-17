@@ -1,6 +1,6 @@
 import Foundation
 
-/// Pure helpers that turn `ThunderboltSwitch` / `ThunderboltPort` model
+/// Pure helpers that turn `IOThunderboltSwitch` / `IOThunderboltPort` model
 /// values into user-facing labels. Convention: per-lane Gb/s × lane count,
 /// matching Apple's `system_profiler SPThunderboltDataType` output so the
 /// labels line up with what users see in About This Mac → System Information.
@@ -16,7 +16,7 @@ public enum ThunderboltLabels {
     /// - `"Up to 10 Gb/s × 1"` (TB3 single-lane)
     /// - `"Up to 40 Gb/s × 2"` (TB5 / USB4 v2 dual-lane)
     /// - `"Up to 40 Gb/s (3 TX / 1 RX)"` (TB5 asymmetric)
-    public static func linkLabel(for port: ThunderboltPort) -> String? {
+    public static func linkLabel(for port: IOThunderboltPort) -> String? {
         guard port.hasActiveLink,
               let gen = port.currentSpeed,
               let width = port.currentWidth else {
@@ -48,7 +48,7 @@ public enum ThunderboltLabels {
     /// Human-readable name for a downstream switch ("ASUS PA32QCV",
     /// "CalDigit, Inc. TS3 Plus"). Falls back to "Unknown device" if the
     /// DROM didn't decode (rare but possible).
-    public static func deviceName(for sw: ThunderboltSwitch) -> String {
+    public static func deviceName(for sw: IOThunderboltSwitch) -> String {
         let vendor = sw.vendorName.trimmingCharacters(in: .whitespaces)
         let model = sw.modelName.trimmingCharacters(in: .whitespaces)
         switch (vendor.isEmpty, model.isEmpty) {
@@ -68,8 +68,8 @@ public enum ThunderboltTopology {
     /// (e.g. `Port-USB-C@1` → `1`).
     public static func hostRoot(
         forSocketID socketID: String,
-        in switches: [ThunderboltSwitch]
-    ) -> ThunderboltSwitch? {
+        in switches: [IOThunderboltSwitch]
+    ) -> IOThunderboltSwitch? {
         switches.first { sw in
             sw.isHostRoot && sw.ports.contains {
                 $0.adapterType.isLane && $0.socketID == socketID
@@ -89,16 +89,16 @@ public enum ThunderboltTopology {
     /// in depth order (root → device). Walks the `parentSwitchUID` graph.
     /// Returns just the root if there's nothing downstream.
     public static func chain(
-        from root: ThunderboltSwitch,
-        in switches: [ThunderboltSwitch]
-    ) -> [ThunderboltSwitch] {
-        var byParent: [Int64: [ThunderboltSwitch]] = [:]
+        from root: IOThunderboltSwitch,
+        in switches: [IOThunderboltSwitch]
+    ) -> [IOThunderboltSwitch] {
+        var byParent: [Int64: [IOThunderboltSwitch]] = [:]
         for sw in switches {
             guard let parentUID = sw.parentSwitchUID else { continue }
             byParent[parentUID, default: []].append(sw)
         }
 
-        var chain: [ThunderboltSwitch] = [root]
+        var chain: [IOThunderboltSwitch] = [root]
         var current = root
         // Follow first-child only. Daisy-chains are linear in the common
         // case; if the user has a true tree (dock with two TB devices),
@@ -114,7 +114,7 @@ public enum ThunderboltTopology {
     /// Find the active downstream lane port on a switch (the one going
     /// toward the next-hop device, not the upstream link to the host).
     /// Useful for picking which port's link state describes the next leg.
-    public static func activeDownstreamLanePort(_ sw: ThunderboltSwitch) -> ThunderboltPort? {
+    public static func activeDownstreamLanePort(_ sw: IOThunderboltSwitch) -> IOThunderboltPort? {
         // Host root: any active lane port is downstream by definition.
         // Downstream switch: skip the lane port matching upstreamPortNumber,
         // pick the first active one of the rest.

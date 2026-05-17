@@ -7,8 +7,8 @@ import WhatCableCore
 /// macOS exposes these as separate IOKit classes, so we have to match both.
 /// Some hardware also exposes SOP'' as a third class.
 @MainActor
-public final class PDIdentityWatcher: ObservableObject {
-    @Published public private(set) var identities: [PDIdentity] = []
+public final class USBPDSOPWatcher: ObservableObject {
+    @Published public private(set) var identities: [USBPDSOP] = []
 
     private static let matchedClasses = [
         "IOPortTransportComponentCCUSBPDSOP",
@@ -31,12 +31,12 @@ public final class PDIdentityWatcher: ObservableObject {
 
         let added: IOServiceMatchingCallback = { refcon, iter in
             guard let refcon else { return }
-            let w = Unmanaged<PDIdentityWatcher>.fromOpaque(refcon).takeUnretainedValue()
+            let w = Unmanaged<USBPDSOPWatcher>.fromOpaque(refcon).takeUnretainedValue()
             Task { @MainActor in w.handleAdded(iter) }
         }
         let removed: IOServiceMatchingCallback = { refcon, iter in
             guard let refcon else { return }
-            let w = Unmanaged<PDIdentityWatcher>.fromOpaque(refcon).takeUnretainedValue()
+            let w = Unmanaged<USBPDSOPWatcher>.fromOpaque(refcon).takeUnretainedValue()
             Task { @MainActor in w.handleRemoved(iter) }
         }
 
@@ -95,7 +95,7 @@ public final class PDIdentityWatcher: ObservableObject {
         }
     }
 
-    private func makeIdentity(from service: io_service_t) -> PDIdentity? {
+    private func makeIdentity(from service: io_service_t) -> USBPDSOP? {
         var entryID: UInt64 = 0
         IORegistryEntryGetRegistryEntryID(service, &entryID)
 
@@ -124,7 +124,7 @@ public final class PDIdentityWatcher: ObservableObject {
             return PDVDO.vdoFromData(data)
         }
 
-        return PDIdentity(
+        return USBPDSOP(
             id: entryID,
             endpoint: endpoint,
             parentPortType: parent.type,
@@ -145,11 +145,11 @@ public final class PDIdentityWatcher: ObservableObject {
             ?? "Unknown"
     }
 
-    nonisolated static func endpoint(from dict: [String: Any], className: String? = nil) -> PDIdentity.Endpoint {
+    nonisolated static func endpoint(from dict: [String: Any], className: String? = nil) -> USBPDSOP.Endpoint {
         if let name = (dict["ComponentName"] as? String)
             ?? (dict["AddressDescription"] as? String)
             ?? (dict["Address Description"] as? String) {
-            return PDIdentity.Endpoint(rawValue: name) ?? .unknown
+            return USBPDSOP.Endpoint(rawValue: name) ?? .unknown
         }
         // The IOKit class name is the most reliable signal: macOS exposes
         // SOP' as a separate `IOPortTransportComponentCCUSBPDSOPp` class
@@ -215,7 +215,7 @@ public final class PDIdentityWatcher: ObservableObject {
         (metadata["bcdDevice"] as? NSNumber)?.intValue ?? 0
     }
 
-    public func identities(for port: USBCPort) -> [PDIdentity] {
+    public func identities(for port: USBCPort) -> [USBPDSOP] {
         guard let key = port.portKey else { return [] }
         return identities.filter { $0.portKey == key }
     }

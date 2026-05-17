@@ -4,10 +4,10 @@ public enum TextFormatter {
     public static func render(
         ports: [USBCPort],
         sources: [PowerSource],
-        identities: [PDIdentity],
+        identities: [USBPDSOP],
         showRaw: Bool,
         adapter: AdapterInfo? = nil,
-        thunderboltSwitches: [ThunderboltSwitch] = [],
+        thunderboltSwitches: [IOThunderboltSwitch] = [],
         isDesktopMac: Bool = false,
         federatedIdentities: [FederatedIdentity] = [],
         usb3Transports: [USB3Transport] = [],
@@ -51,10 +51,10 @@ public enum TextFormatter {
     private static func renderPort(
         _ port: USBCPort,
         sources: [PowerSource],
-        identities: [PDIdentity],
+        identities: [USBPDSOP],
         showRaw: Bool,
         adapter: AdapterInfo?,
-        thunderboltSwitches: [ThunderboltSwitch],
+        thunderboltSwitches: [IOThunderboltSwitch],
         federatedIdentities: [FederatedIdentity] = [],
         usb3Transports: [USB3Transport] = [],
         cioCapability: CIOCableCapability? = nil,
@@ -168,7 +168,7 @@ public enum TextFormatter {
         return all.filter { $0.portKey == key }
     }
 
-    private static func filterIdentities(_ port: USBCPort, all: [PDIdentity]) -> [PDIdentity] {
+    private static func filterIdentities(_ port: USBCPort, all: [USBPDSOP]) -> [USBPDSOP] {
         guard let key = port.portKey else { return [] }
         return all.filter { $0.portKey == key }
     }
