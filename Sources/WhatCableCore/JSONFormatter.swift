@@ -9,6 +9,7 @@ public enum JSONFormatter {
         adapter: AdapterInfo? = nil,
         thunderboltSwitches: [IOThunderboltSwitch] = [],
         isDesktopMac: Bool = false,
+        batteryFullyCharged: Bool? = nil,
         federatedIdentities: [FederatedIdentity] = [],
         usb3Transports: [USB3Transport] = [],
         trmTransports: [TRMTransport] = [],
@@ -39,6 +40,7 @@ public enum JSONFormatter {
                     trmTransports: trmTransports.filter { $0.portKey == port.portKey },
                     cioCapability: cioCapabilities.first { $0.portKey == port.portKey },
                     chargerWattageSource: wattageSource,
+                    batteryFullyCharged: batteryFullyCharged,
                     usbDevices: port.matchingDevices(from: usbDevices)
                 )
             },
@@ -106,6 +108,7 @@ private struct PortDTO: Codable {
         trmTransports: [TRMTransport] = [],
         cioCapability: CIOCableCapability? = nil,
         chargerWattageSource: ChargerWattageSource = .unknown,
+        batteryFullyCharged: Bool? = nil,
         usbDevices: [USBDevice] = []
     ) {
         self.name = port.portDescription ?? port.serviceName
@@ -123,7 +126,8 @@ private struct PortDTO: Codable {
             federatedIdentities: federatedIdentities,
             usb3Transports: usb3Transports,
             cioCapability: cioCapability,
-            chargerWattageSource: chargerWattageSource
+            chargerWattageSource: chargerWattageSource,
+            batteryFullyCharged: batteryFullyCharged
         )
         self.status = String(describing: summary.status)
         self.headline = summary.headline

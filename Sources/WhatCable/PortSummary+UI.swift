@@ -6,6 +6,7 @@ extension PortSummary {
         switch status {
         case .empty: return "powerplug"
         case .charging: return "bolt.fill"
+        case .batteryFull: return "battery.100"
         case .dataDevice: return "cable.connector"
         case .thunderboltCable: return "bolt.horizontal.fill"
         case .displayCable: return "display"
@@ -17,6 +18,7 @@ extension PortSummary {
         switch status {
         case .empty: return .secondary
         case .charging: return .yellow
+        case .batteryFull: return .green
         case .dataDevice: return .blue
         case .thunderboltCable: return .purple
         case .displayCable: return .teal

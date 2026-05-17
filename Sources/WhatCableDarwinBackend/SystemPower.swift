@@ -66,6 +66,13 @@ public enum SystemPower {
             pmuConfiguration: pmuConfig
         )
     }
+
+    /// AppleSmartBattery's FullyCharged flag. `nil` on desktop Macs / when
+    /// no battery is present. Same source the snapshot pipeline uses, so
+    /// the GUI and CLI agree on battery-full state.
+    public static func batteryFullyCharged() -> Bool? {
+        AppleSmartBatteryReader.read().battery?.fullyCharged
+    }
 }
 
 extension ChargingDiagnostic {

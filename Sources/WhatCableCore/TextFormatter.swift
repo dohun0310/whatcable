@@ -9,6 +9,7 @@ public enum TextFormatter {
         adapter: AdapterInfo? = nil,
         thunderboltSwitches: [IOThunderboltSwitch] = [],
         isDesktopMac: Bool = false,
+        batteryFullyCharged: Bool? = nil,
         federatedIdentities: [FederatedIdentity] = [],
         usb3Transports: [USB3Transport] = [],
         cioCapabilities: [CIOCableCapability] = [],
@@ -42,6 +43,7 @@ public enum TextFormatter {
                 usb3Transports: usb3Transports.filter { $0.portKey == port.portKey },
                 cioCapability: cioCapabilities.first { $0.portKey == port.portKey },
                 chargerWattageSource: wattageSource,
+                batteryFullyCharged: batteryFullyCharged,
                 usbDevices: port.matchingDevices(from: usbDevices)
             )
         }
@@ -59,6 +61,7 @@ public enum TextFormatter {
         usb3Transports: [USB3Transport] = [],
         cioCapability: CIOCableCapability? = nil,
         chargerWattageSource: ChargerWattageSource = .unknown,
+        batteryFullyCharged: Bool? = nil,
         usbDevices: [USBDevice] = []
     ) -> String {
         let summary = PortSummary(
@@ -70,7 +73,8 @@ public enum TextFormatter {
             federatedIdentities: federatedIdentities,
             usb3Transports: usb3Transports,
             cioCapability: cioCapability,
-            chargerWattageSource: chargerWattageSource
+            chargerWattageSource: chargerWattageSource,
+            batteryFullyCharged: batteryFullyCharged
         )
         let label = port.portDescription ?? port.serviceName
         let typeSuffix = port.portTypeDescription.map { " (\($0))" } ?? ""
@@ -156,6 +160,7 @@ public enum TextFormatter {
         switch status {
         case .empty: return ANSI.gray
         case .charging: return ANSI.yellow
+        case .batteryFull: return ANSI.green
         case .dataDevice: return ANSI.blue
         case .thunderboltCable: return ANSI.magenta
         case .displayCable: return ANSI.cyan

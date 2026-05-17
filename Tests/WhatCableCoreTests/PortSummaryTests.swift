@@ -115,6 +115,57 @@ struct PortSummaryTests {
         #expect(summary.headline == "Charging · 140W charger")
     }
 
+    // MARK: - Battery full (issue #154)
+
+    @Test("Battery full overrides the charging headline")
+    func batteryFullOverridesChargingHeadline() {
+        let port = makePort(connected: true, active: [], supported: [])
+        let summary = PortSummary(
+            port: port,
+            sources: [brickID(maxW: 140, winningW: 140)],
+            batteryFullyCharged: true
+        )
+        #expect(summary.status == .batteryFull)
+        #expect(summary.headline == "Plugged in · battery full")
+        #expect(summary.subtitle == "Charger connected. Battery is full, so the Mac isn't drawing power.")
+    }
+
+    @Test("Battery full overrides the 'Charging only' state")
+    func batteryFullOverridesChargingOnly() {
+        // No PD source, USB2 only: the "Charging only" branch.
+        let port = makePort(connected: true, active: [], supported: ["USB2"])
+        let summary = PortSummary(port: port, batteryFullyCharged: true)
+        #expect(summary.status == .batteryFull)
+        #expect(summary.headline == "Plugged in · battery full")
+    }
+
+    @Test("Battery not full still shows charging wattage")
+    func batteryNotFullStillShowsCharging() {
+        // Regression guard: false / nil must not trigger the battery-full path.
+        let port = makePort(connected: true, active: [], supported: ["USB2"])
+        let chargingFalse = PortSummary(
+            port: port,
+            sources: [usbPD(maxW: 96, winningW: 60)],
+            batteryFullyCharged: false
+        )
+        #expect(chargingFalse.status == .charging)
+        #expect(chargingFalse.headline == "Charging · 96W charger")
+
+        let chargingNil = PortSummary(port: port, sources: [usbPD(maxW: 96, winningW: 60)])
+        #expect(chargingNil.status == .charging)
+        #expect(chargingNil.headline == "Charging · 96W charger")
+    }
+
+    @Test("Battery full does not relabel a data connection")
+    func batteryFullDoesNotRelabelData() {
+        // A USB3 data device with the battery full is still a data device;
+        // the override only applies to the pure-power headlines.
+        let port = makePort(active: ["USB3"], supported: ["USB2", "USB3"], superSpeed: true)
+        let summary = PortSummary(port: port, batteryFullyCharged: true)
+        #expect(summary.status == .dataDevice)
+        #expect(summary.headline.hasPrefix("USB device"), "got: \(summary.headline)")
+    }
+
     // MARK: - USB
 
     @Test("USB2 only is slow device")

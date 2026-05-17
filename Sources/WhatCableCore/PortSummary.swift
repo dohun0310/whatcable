@@ -8,6 +8,7 @@ public struct PortSummary {
     public enum Status {
         case empty
         case charging
+        case batteryFull
         case dataDevice
         case thunderboltCable
         case displayCable
@@ -46,7 +47,8 @@ extension PortSummary {
         usb3Transports: [USB3Transport] = [],
         cioCapability: CIOCableCapability? = nil,
         isConnectedOverride: Bool? = nil,
-        chargerWattageSource: ChargerWattageSource = .unknown
+        chargerWattageSource: ChargerWattageSource = .unknown,
+        batteryFullyCharged: Bool? = nil
     ) {
         let connected = isConnectedOverride ?? (port.connectionActive == true)
         let active = port.transportsActive
@@ -350,6 +352,10 @@ extension PortSummary {
                 self.headline = String(localized: "Slow USB device or charge-only cable", bundle: _coreLocalizedBundle) + cableLimitSuffix
             }
             self.subtitle = String(localized: "Only USB 2.0 is active. If you expected high speed, the cable may not support it.", bundle: _coreLocalizedBundle)
+        } else if chargingSource != nil, batteryFullyCharged == true {
+            self.status = .batteryFull
+            self.headline = String(localized: "Plugged in · battery full", bundle: _coreLocalizedBundle)
+            self.subtitle = String(localized: "Charger connected. Battery is full, so the Mac isn't drawing power.", bundle: _coreLocalizedBundle)
         } else if chargingSource != nil {
             self.status = .charging
             if let w = chargerW {
@@ -358,6 +364,10 @@ extension PortSummary {
                 self.headline = String(localized: "Charging", bundle: _coreLocalizedBundle) + cableLimitSuffix
             }
             self.subtitle = String(localized: "Power is flowing. No data connection.", bundle: _coreLocalizedBundle)
+        } else if active.isEmpty && supported.contains("USB2"), batteryFullyCharged == true {
+            self.status = .batteryFull
+            self.headline = String(localized: "Plugged in · battery full", bundle: _coreLocalizedBundle)
+            self.subtitle = String(localized: "Charger connected. Battery is full, so the Mac isn't drawing power.", bundle: _coreLocalizedBundle)
         } else if active.isEmpty && supported.contains("USB2") {
             self.status = .charging
             self.headline = String(localized: "Charging only", bundle: _coreLocalizedBundle)

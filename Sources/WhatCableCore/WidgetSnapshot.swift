@@ -83,6 +83,7 @@ public struct WidgetSnapshot: Codable, Equatable {
     public enum Status: String, Codable {
         case empty
         case charging
+        case batteryFull
         case dataDevice
         case thunderboltCable
         case displayCable
@@ -125,6 +126,7 @@ extension WidgetSnapshot.Status {
         switch summary {
         case .empty: self = .empty
         case .charging: self = .charging
+        case .batteryFull: self = .batteryFull
         case .dataDevice: self = .dataDevice
         case .thunderboltCable: self = .thunderboltCable
         case .displayCable: self = .displayCable
@@ -140,6 +142,7 @@ extension WidgetSnapshot.Status {
         switch self {
         case .empty: return "powerplug"
         case .charging: return "bolt.fill"
+        case .batteryFull: return "battery.100"
         case .dataDevice: return "cable.connector"
         case .thunderboltCable: return "bolt.horizontal.fill"
         case .displayCable: return "display"

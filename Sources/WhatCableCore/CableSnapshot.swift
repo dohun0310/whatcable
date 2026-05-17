@@ -124,6 +124,10 @@ public struct CableSnapshot: Equatable {
     /// per-lane transport mode (CIO/DisplayPort/idle), USB2 state, and DP
     /// pixel clock. One entry per physical USB-C port.
     public let typeCPhys: [AppleTypeCPhy]
+    /// AppleSmartBattery's FullyCharged flag. `nil` on desktop Macs / when
+    /// no battery is present, so consumers never claim "battery full" on a
+    /// machine that has no battery.
+    public let batteryFullyCharged: Bool?
 
     public init(
         ports: [AppleHPMInterface],
@@ -137,7 +141,8 @@ public struct CableSnapshot: Equatable {
         usb3Transports: [USB3Transport] = [],
         trmTransports: [TRMTransport] = [],
         cioCapabilities: [CIOCableCapability] = [],
-        typeCPhys: [AppleTypeCPhy] = []
+        typeCPhys: [AppleTypeCPhy] = [],
+        batteryFullyCharged: Bool? = nil
     ) {
         self.ports = ports
         self.powerSources = powerSources
@@ -151,6 +156,7 @@ public struct CableSnapshot: Equatable {
         self.trmTransports = trmTransports
         self.cioCapabilities = cioCapabilities
         self.typeCPhys = typeCPhys
+        self.batteryFullyCharged = batteryFullyCharged
     }
 }
 

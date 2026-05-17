@@ -64,7 +64,8 @@ public final class DarwinSnapshotProvider: CableSnapshotProvider, @unchecked Sen
                 usb3Transports: usb3Watcher.transports,
                 trmTransports: trmWatcher.transports,
                 cioCapabilities: trmWatcher.cioCapabilities,
-                typeCPhys: phyWatcher.phys
+                typeCPhys: phyWatcher.phys,
+                batteryFullyCharged: battery.battery?.fullyCharged
             )
             DarwinSnapshotProvider.logChargingSignals(snap)
             return snap

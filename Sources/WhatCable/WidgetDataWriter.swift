@@ -172,6 +172,7 @@ final class WidgetDataWriter {
 
 
     private func buildSnapshot() -> WidgetSnapshot {
+        let batteryFull = SystemPower.batteryFullyCharged()
         let entries: [WidgetSnapshot.PortEntry] = portWatcher.ports.map { port in
             let devices = port.matchingDevices(from: deviceWatcher.devices)
             let sources = powerWatcher.sources(for: port)
@@ -192,7 +193,8 @@ final class WidgetDataWriter {
                 thunderboltSwitches: tbWatcher.switches,
                 usb3Transports: usb3Watcher.transports(for: port),
                 cioCapability: trmWatcher.cioCapabilities.first { $0.portKey == port.portKey },
-                isConnectedOverride: isLive
+                isConnectedOverride: isLive,
+                batteryFullyCharged: batteryFull
             )
 
             let status = WidgetSnapshot.Status(from: summary.status)

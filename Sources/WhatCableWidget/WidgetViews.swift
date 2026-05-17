@@ -243,6 +243,7 @@ extension WidgetSnapshot.Status {
         switch self {
         case .empty: return .secondary
         case .charging: return .yellow
+        case .batteryFull: return .green
         case .dataDevice: return .blue
         case .thunderboltCable: return .purple
         case .displayCable: return .teal
@@ -286,6 +287,7 @@ private extension WidgetSnapshot.Status {
         case .displayCable: return 4
         case .dataDevice: return 3
         case .charging: return 2
+        case .batteryFull: return 2
         case .unknown: return 1
         case .empty: return 0
         }

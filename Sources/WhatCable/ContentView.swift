@@ -201,6 +201,7 @@ struct ContentView: View {
             } else {
                 let activePortCount = portWatcher.ports.filter { $0.connectionActive == true }.count
                 let adapter = SystemPower.currentAdapter()
+                let batteryFull = SystemPower.batteryFullyCharged()
                 ScrollView {
                     VStack(spacing: 12) {
                         ForEach(visiblePorts) { port in
@@ -220,7 +221,8 @@ struct ContentView: View {
                                 isLive: isPortLive(port),
                                 showAdvanced: showAdvanced,
                                 cioCapability: trmWatcher.cioCapabilities.first { $0.portKey == port.portKey },
-                                chargerWattageSource: wattageSource
+                                chargerWattageSource: wattageSource,
+                                batteryFullyCharged: batteryFull
                             )
                         }
                     }
@@ -443,6 +445,7 @@ struct PortCard: View {
     let showAdvanced: Bool
     let cioCapability: CIOCableCapability?
     let chargerWattageSource: ChargerWattageSource
+    let batteryFullyCharged: Bool?
 
     @State private var reportingCable: USBPDSOP?
 
@@ -456,7 +459,8 @@ struct PortCard: View {
             usb3Transports: usb3Transports,
             cioCapability: cioCapability,
             isConnectedOverride: isLive,
-            chargerWattageSource: chargerWattageSource
+            chargerWattageSource: chargerWattageSource,
+            batteryFullyCharged: batteryFullyCharged
         )
     }
 
