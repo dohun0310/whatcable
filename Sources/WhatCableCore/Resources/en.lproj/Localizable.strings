@@ -112,6 +112,26 @@
 "smart cable" = "smart cable";
 "video" = "video";
 
+/* Cable speed / charger status strings (previously missing keys) */
+"40 Gbps capable" = "40 Gbps capable";
+"Charger connected. Battery is full, so the Mac isn't drawing power." = "Charger connected. Battery is full, so the Mac isn't drawing power.";
+"E-marker reports passive (no USB signal conditioning). Thunderbolt is negotiated separately by the controller." = "E-marker reports passive (no USB signal conditioning). Thunderbolt is negotiated separately by the controller.";
+"E-marker reports passive. This is normal for Thunderbolt cables where the active electronics handle Thunderbolt, not USB." = "E-marker reports passive. This is normal for Thunderbolt cables where the active electronics handle Thunderbolt, not USB.";
+"Per-port negotiation data is not available. Wattage is from the system-wide adapter reading." = "Per-port negotiation data is not available. Wattage is from the system-wide adapter reading.";
+"Plugged in · battery full" = "Plugged in · battery full";
+"Try a higher-wattage charger to identify the cable." = "Try a higher-wattage charger to identify the cable.";
+"USB4 Gen 3 (40 Gbps, Thunderbolt 4 class)" = "USB4 Gen 3 (40 Gbps, Thunderbolt 4 class)";
+"USB4 Gen 4 (80 Gbps, Thunderbolt 5 class)" = "USB4 Gen 4 (80 Gbps, Thunderbolt 5 class)";
+
+/* DisplayPort lane labels, connected-device variants, pin-diagram Data label */
+"2 DP lanes + USB3 data" = "2 DP lanes + USB3 data";
+"4 DP lanes (no USB3 alongside video)" = "4 DP lanes (no USB3 alongside video)";
+"Carrying DisplayPort video (%@)" = "Carrying DisplayPort video (%@)";
+"Connected device: %@" = "Connected device: %@";
+"Connected device: %@, %@ (%@)" = "Connected device: %1$@, %2$@ (%3$@)";
+"Data" = "Data";
+"DisplayPort alt mode" = "DisplayPort alt mode";
+
 /* Pro plugin UI strings */
 "%@ (spec, not measured)" = "%@ (spec, not measured)";
 "%@ Diagnostics" = "%@ Diagnostics";

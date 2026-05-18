@@ -112,6 +112,27 @@
 "smart cable" = "câble intelligent";
 "video" = "vidéo";
 
+/* DisplayPort lane labels, connected-device variants, pin-diagram Data label */
+"2 DP lanes + USB3 data" = "2 voies DP + données USB3";
+"4 DP lanes (no USB3 alongside video)" = "4 voies DP (pas d'USB3 avec la vidéo)";
+"Carrying DisplayPort video (%@)" = "Transport vidéo DisplayPort (%@)";
+"Connected device: %@" = "Appareil connecté : %@";
+"Connected device: %@, %@ (%@)" = "Appareil connecté : %1$@, %2$@ (%3$@)";
+"Data" = "Données";
+"DisplayPort alt mode" = "Mode alternatif DisplayPort";
+
+/* Cable speed / charger status strings (previously missing keys) */
+"40 Gbps capable" = "Compatible 40 Gbps";
+"Charger connected. Battery is full, so the Mac isn't drawing power." = "Chargeur connecté. La batterie est pleine, le Mac ne consomme donc pas d'énergie.";
+"E-marker reports passive (no USB signal conditioning). Thunderbolt is negotiated separately by the controller." = "L'e-marker se déclare passif (pas de conditionnement du signal USB). Le Thunderbolt est négocié séparément par le contrôleur.";
+"E-marker reports passive. This is normal for Thunderbolt cables where the active electronics handle Thunderbolt, not USB." = "L'e-marker se déclare passif. C'est normal pour les câbles Thunderbolt où l'électronique active gère le Thunderbolt, pas l'USB.";
+"Per-port negotiation data is not available. Wattage is from the system-wide adapter reading." = "Les données de négociation par port ne sont pas disponibles. La puissance provient du relevé global de l'adaptateur.";
+"Plugged in · battery full" = "Branché · batterie pleine";
+"Try a higher-wattage charger to identify the cable." = "Essayez un chargeur de plus forte puissance pour identifier le câble.";
+"USB4 Gen 3 (40 Gbps, Thunderbolt 4 class)" = "USB4 Gen 3 (40 Gbps, classe Thunderbolt 4)";
+"USB4 Gen 4 (80 Gbps, Thunderbolt 5 class)" = "USB4 Gen 4 (80 Gbps, classe Thunderbolt 5)";
+
+
 /* Pro plugin UI strings */
 "%@ (spec, not measured)" = "%@ (spécification, non mesuré)";
 "%@ Diagnostics" = "Diagnostics %@";

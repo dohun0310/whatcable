@@ -112,6 +112,27 @@
 "smart cable" = "smartkabel";
 "video" = "video";
 
+/* DisplayPort lane labels, connected-device variants, pin-diagram Data label */
+"2 DP lanes + USB3 data" = "2 DP-baner + USB3-data";
+"4 DP lanes (no USB3 alongside video)" = "4 DP-baner (ingen USB3 ved siden av video)";
+"Carrying DisplayPort video (%@)" = "Overfører DisplayPort-video (%@)";
+"Connected device: %@" = "Tilkoblet enhet: %@";
+"Connected device: %@, %@ (%@)" = "Tilkoblet enhet: %1$@, %2$@ (%3$@)";
+"Data" = "Data";
+"DisplayPort alt mode" = "DisplayPort alternativ modus";
+
+/* Cable speed / charger status strings (previously missing keys) */
+"40 Gbps capable" = "Støtter 40 Gbps";
+"Charger connected. Battery is full, so the Mac isn't drawing power." = "Lader tilkoblet. Batteriet er fullt, så Macen trekker ikke strøm.";
+"E-marker reports passive (no USB signal conditioning). Thunderbolt is negotiated separately by the controller." = "E-marker rapporterer passiv (ingen USB-signalkondisjonering). Thunderbolt forhandles separat av kontrolleren.";
+"E-marker reports passive. This is normal for Thunderbolt cables where the active electronics handle Thunderbolt, not USB." = "E-marker rapporterer passiv. Dette er normalt for Thunderbolt-kabler der den aktive elektronikken håndterer Thunderbolt, ikke USB.";
+"Per-port negotiation data is not available. Wattage is from the system-wide adapter reading." = "Forhandlingsdata per port er ikke tilgjengelig. Wattallet er fra systemets samlede avlesning av strømadapteren.";
+"Plugged in · battery full" = "Tilkoblet · batteri fullt";
+"Try a higher-wattage charger to identify the cable." = "Prøv en lader med høyere watt for å identifisere kabelen.";
+"USB4 Gen 3 (40 Gbps, Thunderbolt 4 class)" = "USB4 Gen 3 (40 Gbps, Thunderbolt 4-klasse)";
+"USB4 Gen 4 (80 Gbps, Thunderbolt 5 class)" = "USB4 Gen 4 (80 Gbps, Thunderbolt 5-klasse)";
+
+
 /* Pro plugin UI strings */
 "%@ (spec, not measured)" = "%@ (spesifikasjon, ikke målt)";
 "%@ Diagnostics" = "%@-diagnostikk";

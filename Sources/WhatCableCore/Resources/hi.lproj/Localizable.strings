@@ -112,6 +112,26 @@
 "smart cable" = "स्मार्ट केबल";
 "video" = "वीडियो";
 
+/* DisplayPort lane labels, connected-device variants, pin-diagram Data label */
+"2 DP lanes + USB3 data" = "2 DP लेन + USB3 डेटा";
+"4 DP lanes (no USB3 alongside video)" = "4 DP लेन (वीडियो के साथ USB3 नहीं)";
+"Carrying DisplayPort video (%@)" = "DisplayPort वीडियो प्रसारित हो रहा है (%@)";
+"Connected device: %@" = "कनेक्टेड डिवाइस: %@";
+"Connected device: %@, %@ (%@)" = "कनेक्टेड डिवाइस: %1$@, %2$@ (%3$@)";
+"Data" = "डेटा";
+"DisplayPort alt mode" = "DisplayPort ऑल्ट मोड";
+
+/* Cable speed / charger status strings (previously missing keys) */
+"40 Gbps capable" = "40 Gbps सक्षम";
+"Charger connected. Battery is full, so the Mac isn't drawing power." = "चार्जर कनेक्ट हुआ। बैटरी पूरी भरी है, इसलिए Mac पावर नहीं खींच रहा।";
+"E-marker reports passive (no USB signal conditioning). Thunderbolt is negotiated separately by the controller." = "e-marker पैसिव रिपोर्ट करता है (कोई USB सिग्नल कंडीशनिंग नहीं)। Thunderbolt कंट्रोलर द्वारा अलग से नेगोशिएट किया जाता है।";
+"E-marker reports passive. This is normal for Thunderbolt cables where the active electronics handle Thunderbolt, not USB." = "e-marker पैसिव रिपोर्ट करता है। यह Thunderbolt केबल के लिए सामान्य है, जहाँ सक्रिय इलेक्ट्रॉनिक्स Thunderbolt संभालते हैं, USB नहीं।";
+"Per-port negotiation data is not available. Wattage is from the system-wide adapter reading." = "प्रति-पोर्ट नेगोशिएशन डेटा उपलब्ध नहीं है। वॉटेज सिस्टम-वाइड अडैप्टर रीडिंग से है।";
+"Plugged in · battery full" = "प्लग इन · बैटरी पूरी";
+"Try a higher-wattage charger to identify the cable." = "केबल पहचानने के लिए अधिक वॉटेज वाला चार्जर आज़माएँ।";
+"USB4 Gen 3 (40 Gbps, Thunderbolt 4 class)" = "USB4 Gen 3 (40 Gbps, Thunderbolt 4 श्रेणी)";
+"USB4 Gen 4 (80 Gbps, Thunderbolt 5 class)" = "USB4 Gen 4 (80 Gbps, Thunderbolt 5 श्रेणी)";
+
 /* Pro plugin UI strings */
 "%@ (spec, not measured)" = "%@ (विनिर्देश, मापा नहीं गया)";
 "%@ Diagnostics" = "%@ डायग्नोस्टिक्स";

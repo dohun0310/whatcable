@@ -74,3 +74,18 @@
 "%lld USB devices" = "%lld USB-enheter";
 "active" = "aktiv";
 "no active link" = "ingen aktiv forbindelse";
+
+
+/* Test Kit / Contribute Diagnostic Data consent + notifications (previously missing keys) */
+"%lld devices removed" = "%lld enheter fjernet";
+"COMMUNITY" = "FELLESSKAP";
+"Contribute Diagnostic Data" = "Bidra med diagnostikkdata";
+"Contribute Diagnostic Data…" = "Bidra med diagnostikkdata…";
+"Privacy" = "Personvern";
+"Pro" = "Pro";
+"Proceed" = "Fortsett";
+"Raw IOKit registry properties for each USB-C port, your macOS version, and chip type. This is the same data visible in System Information." = "Rå IOKit-registeregenskaper for hver USB-C-port, macOS-versjonen din og brikketypen. Dette er de samme dataene som vises i System Information.";
+"What happens" = "Hva som skjer";
+"What is collected" = "Hva som samles inn";
+"WhatCable runs 13 IOKit probes that read raw USB-C and Thunderbolt data from your Mac's port controller registers. The results are sent to a secure server to help improve cable and port detection." = "WhatCable kjører 13 IOKit-prober som leser rå USB-C- og Thunderbolt-data fra portkontrollerregistrene på Macen din. Resultatene sendes til en sikker server for å bidra til bedre gjenkjenning av kabler og porter.";
+"Your machine's hardware UUID is hashed with SHA-256 before sending. No names, accounts, serial numbers, or personal data are collected or stored." = "Maskinens hardware-UUID hashes med SHA-256 før sending. Ingen navn, kontoer, serienumre eller personopplysninger samles inn eller lagres.";
