@@ -1473,9 +1473,9 @@
             </div>
 <pre>brew tap darrylmorley/whatcable
 brew install --cask whatcable</pre>
-            <a class="button primary" href="https://github.com/darrylmorley/homebrew-whatcable">
-              View tap on GitHub
-            </a>
+            <button type="button" class="button primary" data-copy="brew tap darrylmorley/whatcable &amp;&amp; brew install --cask whatcable" onclick="copyCommand(this)">
+              Copy command
+            </button>
           </div>
 
           <div class="install-card">
@@ -1515,6 +1515,24 @@ brew install --cask whatcable</pre>
       </div>
     </footer>
     <script>
+      function copyCommand(btn) {
+        const text = btn.dataset.copy;
+        if (!text) return;
+        const original = btn.textContent.trim();
+        const revert = (msg) => {
+          btn.textContent = msg;
+          setTimeout(() => { btn.textContent = original; }, 1500);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(
+            () => revert("Copied!"),
+            () => revert("Copy failed, select manually")
+          );
+        } else {
+          revert("Copy failed, select manually");
+        }
+      }
+
       document.getElementById("newsletter-form").addEventListener("submit", async (e) => {
         e.preventDefault();
         const btn = e.target.querySelector("button");

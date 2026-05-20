@@ -195,6 +195,59 @@
         gap: 6px 16px;
         font-size: 14px;
       }
+      .install-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: 0 0 16px;
+      }
+      .install-card {
+        padding: 18px 20px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        display: flex;
+        flex-direction: column;
+      }
+      .install-card h3 {
+        margin: 0 0 8px;
+      }
+      .install-card p {
+        font-size: 14.5px;
+        margin-bottom: 14px;
+      }
+      .install-card pre {
+        margin: 0;
+        padding: 12px 14px;
+        background: #0e1620;
+        color: #e3e8ef;
+        border-radius: 8px;
+        font-family: "SFMono-Regular", Consolas, monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        overflow-x: auto;
+      }
+      .install-card .button {
+        align-self: flex-start;
+        padding: 10px 16px;
+        min-height: 40px;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        border-radius: 8px;
+        font-weight: 600;
+        line-height: 1;
+        background: var(--accent);
+        color: #fff;
+        border: 1px solid var(--accent);
+      }
+      .install-card .button:hover {
+        background: #0a7188;
+      }
+      @media (max-width: 600px) {
+        .install-grid { grid-template-columns: 1fr; }
+      }
       .pro-badge {
         display: inline-block;
         padding: 1px 6px;
@@ -257,6 +310,7 @@
         <p class="subtitle">How to use the WhatCable menu bar app. Requires macOS 14+ on Apple Silicon.</p>
 
         <ul class="toc">
+          <li><a href="#install">Install</a></li>
           <li><a href="#what-it-shows">What it shows</a></li>
           <li><a href="#charging">Charging diagnostics</a></li>
           <li><a href="#trust">Cable trust signals</a></li>
@@ -268,6 +322,37 @@
           <li><a href="#troubleshooting">Troubleshooting</a></li>
           <li><a href="#good-to-know">Good to know</a></li>
         </ul>
+
+        <h2 id="install">Install</h2>
+        <p>
+          WhatCable is signed with a Developer ID and notarised by Apple, so there are no Gatekeeper warnings. Requires macOS 14 (Sonoma) or later, Apple Silicon only.
+        </p>
+
+        <div class="install-grid">
+          <div class="install-card">
+            <h3>Direct download</h3>
+            <p>
+              Grab the latest <code>WhatCable.zip</code> from GitHub Releases, unzip, and drag <strong>WhatCable.app</strong> into your Applications folder.
+            </p>
+            <a class="button" href="https://github.com/darrylmorley/whatcable/releases/latest">Get the latest release</a>
+          </div>
+
+          <div class="install-card">
+            <h3>Homebrew</h3>
+            <p>
+              Two commands. Also adds the <code>whatcable</code> CLI to your PATH automatically.
+            </p>
+<pre>brew tap darrylmorley/whatcable
+brew install --cask whatcable</pre>
+            <button type="button" class="button" data-copy="brew tap darrylmorley/whatcable &amp;&amp; brew install --cask whatcable" onclick="copyCommand(this)" style="margin-top: 14px;">
+              Copy command
+            </button>
+          </div>
+        </div>
+
+        <div class="note">
+          <strong>Not on the Mac App Store on purpose.</strong> App Sandbox blocks the low-level IOKit reads WhatCable depends on, so it ships signed and notarised outside the store instead.
+        </div>
 
         <h2 id="what-it-shows">What it shows</h2>
         <p>
@@ -517,5 +602,24 @@
         </span>
       </div>
     </footer>
+    <script>
+      function copyCommand(btn) {
+        const text = btn.dataset.copy;
+        if (!text) return;
+        const original = btn.textContent.trim();
+        const revert = (msg) => {
+          btn.textContent = msg;
+          setTimeout(() => { btn.textContent = original; }, 1500);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(
+            () => revert("Copied!"),
+            () => revert("Copy failed, select manually")
+          );
+        } else {
+          revert("Copy failed, select manually");
+        }
+      }
+    </script>
   </body>
 </html>
