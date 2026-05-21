@@ -82,6 +82,8 @@ final class DetachedProWindowManager: NSObject, NSWindowDelegate {
                 return String(localized: "\(type) Port \(num) Diagnostics", bundle: _appLocalizedBundle)
             }
             return String(localized: "Cable Diagnostics", bundle: _appLocalizedBundle)
+        case "pro.overview":
+            return String(localized: "WhatCable Pro", bundle: _appLocalizedBundle)
         default:
             return "WhatCable"
         }

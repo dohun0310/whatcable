@@ -27,6 +27,11 @@ public final class PluginRegistry {
         headerButtonBuilders.append(headerButton)
     }
 
+    public private(set) var footerButtonBuilders: [() -> AnyView] = []
+    public func register(footerButton: @escaping () -> AnyView) {
+        footerButtonBuilders.append(footerButton)
+    }
+
     public private(set) var portCardTrailingBuilders: [(PortCardContext) -> AnyView?] = []
     public func register(portCardTrailing: @escaping (PortCardContext) -> AnyView?) {
         portCardTrailingBuilders.append(portCardTrailing)

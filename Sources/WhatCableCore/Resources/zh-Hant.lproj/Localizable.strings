@@ -239,7 +239,6 @@
 "Power (W)" = "功率 (W)";
 "Power Contract" = "供電合約";
 "Power Monitor" = "電源監控";
-"Power Monitor requires WhatCable Pro." = "電源監控需要 WhatCable Pro。";
 "Power delivery parameters changed (voltage, current, or power role)." = "供電參數已變更（電壓、電流或電源角色）。";
 "Power path status changed. Covers VBUS voltage, current draw, and source/sink transitions." = "電源路徑狀態已變更。涵蓋 VBUS 電壓、電流取用，以及 source/sink 轉換。";
 "Power role swap complete" = "電源角色交換完成";
@@ -292,7 +291,6 @@
 "Voltage" = "電壓";
 "Voltage (V)" = "電壓 (V)";
 "WhatCable Pro" = "WhatCable Pro";
-"WhatCable Pro required" = "需要 WhatCable Pro";
 "Year of manufacture" = "製造年份";
 "Yes" = "是";
 "cable resistance estimate" = "線材電阻估算值";
@@ -354,3 +352,16 @@
 "an unknown speed" = "未知速度";
 "a higher speed" = "更高速度";
 "The cable's own e-marker reports %@, but the Thunderbolt controller negotiated %@. This is common on active Thunderbolt cables that declare themselves passive. The controller's reading is the one used above." = "線材本身的 e-marker 回報 %@，但 Thunderbolt 控制器協商為 %@。這常見於自稱被動式的主動式 Thunderbolt 線材。上方使用的是控制器讀數。";
+
+
+/* Pro overview screen + footer pill (Pro funnel). Parity placeholders in English; refine in the community translation flow. */
+"About WhatCable Pro" = "About WhatCable Pro";
+"Cable Diagnostics" = "Cable Diagnostics";
+"Deep per-port pin maps, plug orientation, and protocol detail." = "Deep per-port pin maps, plug orientation, and protocol detail.";
+"Licence Key" = "Licence Key";
+"Live MagSafe pin layout for charging and diagnostics." = "Live MagSafe pin layout for charging and diagnostics.";
+"Live multi-port power graphs and event history." = "Live multi-port power graphs and event history.";
+"MagSafe pin diagrams" = "MagSafe pin diagrams";
+"Manage Licence…" = "Manage Licence…";
+"See exactly what each link can do, and where the bottleneck is." = "See exactly what each link can do, and where the bottleneck is.";
+"Unlock deep diagnostics, live power graphs, and per-port history. One-off licence, no subscription." = "Unlock deep diagnostics, live power graphs, and per-port history. One-off licence, no subscription.";

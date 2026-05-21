@@ -240,7 +240,6 @@
 "Power (W)" = "電力 (W)";
 "Power Contract" = "電力コントラクト";
 "Power Monitor" = "電力モニター";
-"Power Monitor requires WhatCable Pro." = "電力モニターにはWhatCable Proが必要です。";
 "Power delivery parameters changed (voltage, current, or power role)." = "給電パラメータが変更されました（電圧、電流、または電力ロール）。";
 "Power path status changed. Covers VBUS voltage, current draw, and source/sink transitions." = "電力パスのステータスが変更。VBUS電圧、消費電流、ソース/シンク切り替えをカバーします。";
 "Power role swap complete" = "電力ロール交換完了";
@@ -293,7 +292,6 @@
 "Voltage" = "電圧";
 "Voltage (V)" = "電圧 (V)";
 "WhatCable Pro" = "WhatCable Pro";
-"WhatCable Pro required" = "WhatCable Proが必要";
 "Year of manufacture" = "製造年";
 "Yes" = "はい";
 "cable resistance estimate" = "ケーブル抵抗推定値";
@@ -355,3 +353,16 @@
 "an unknown speed" = "an unknown speed";
 "a higher speed" = "a higher speed";
 "The cable's own e-marker reports %@, but the Thunderbolt controller negotiated %@. This is common on active Thunderbolt cables that declare themselves passive. The controller's reading is the one used above." = "The cable's own e-marker reports %@, but the Thunderbolt controller negotiated %@. This is common on active Thunderbolt cables that declare themselves passive. The controller's reading is the one used above.";
+
+
+/* Pro overview screen + footer pill (Pro funnel). Parity placeholders in English; refine in the community translation flow. */
+"About WhatCable Pro" = "About WhatCable Pro";
+"Cable Diagnostics" = "Cable Diagnostics";
+"Deep per-port pin maps, plug orientation, and protocol detail." = "Deep per-port pin maps, plug orientation, and protocol detail.";
+"Licence Key" = "Licence Key";
+"Live MagSafe pin layout for charging and diagnostics." = "Live MagSafe pin layout for charging and diagnostics.";
+"Live multi-port power graphs and event history." = "Live multi-port power graphs and event history.";
+"MagSafe pin diagrams" = "MagSafe pin diagrams";
+"Manage Licence…" = "Manage Licence…";
+"See exactly what each link can do, and where the bottleneck is." = "See exactly what each link can do, and where the bottleneck is.";
+"Unlock deep diagnostics, live power graphs, and per-port history. One-off licence, no subscription." = "Unlock deep diagnostics, live power graphs, and per-port history. One-off licence, no subscription.";

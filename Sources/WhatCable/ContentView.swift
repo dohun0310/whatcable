@@ -327,6 +327,9 @@ struct ContentView: View {
                 .scaledFont(.caption)
                 .foregroundStyle(.tertiary)
             Text(verbatim: "·").scaledFont(.caption).foregroundStyle(.secondary)
+            ForEach(Array(PluginRegistry.shared.footerButtonBuilders.enumerated()), id: \.offset) { _, builder in
+                builder()
+            }
             Button(String(localized: "Quit", bundle: _appLocalizedBundle)) { NSApplication.shared.terminate(nil) }
                 .buttonStyle(.borderless)
                 .scaledFont(.caption)

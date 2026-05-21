@@ -239,7 +239,6 @@
 "Power (W)" = "Puissance (W)";
 "Power Contract" = "Contrat d'alimentation";
 "Power Monitor" = "Moniteur d'alimentation";
-"Power Monitor requires WhatCable Pro." = "Le Moniteur d'alimentation nécessite WhatCable Pro.";
 "Power delivery parameters changed (voltage, current, or power role)." = "Les paramètres de charge ont changé (tension, courant ou rôle d'alimentation).";
 "Power path status changed. Covers VBUS voltage, current draw, and source/sink transitions." = "L'état du chemin d'alimentation a changé. Couvre la tension VBUS, le courant consommé et les transitions source/récepteur.";
 "Power role swap complete" = "Échange de rôle d'alimentation terminé";
@@ -292,7 +291,6 @@
 "Voltage" = "Tension";
 "Voltage (V)" = "Tension (V)";
 "WhatCable Pro" = "WhatCable Pro";
-"WhatCable Pro required" = "WhatCable Pro requis";
 "Year of manufacture" = "Année de fabrication";
 "Yes" = "Oui";
 "cable resistance estimate" = "estimation de la résistance du câble";
@@ -354,3 +352,16 @@
 "an unknown speed" = "an unknown speed";
 "a higher speed" = "a higher speed";
 "The cable's own e-marker reports %@, but the Thunderbolt controller negotiated %@. This is common on active Thunderbolt cables that declare themselves passive. The controller's reading is the one used above." = "The cable's own e-marker reports %@, but the Thunderbolt controller negotiated %@. This is common on active Thunderbolt cables that declare themselves passive. The controller's reading is the one used above.";
+
+
+/* Pro overview screen + footer pill (Pro funnel). Parity placeholders in English; refine in the community translation flow. */
+"About WhatCable Pro" = "About WhatCable Pro";
+"Cable Diagnostics" = "Cable Diagnostics";
+"Deep per-port pin maps, plug orientation, and protocol detail." = "Deep per-port pin maps, plug orientation, and protocol detail.";
+"Licence Key" = "Licence Key";
+"Live MagSafe pin layout for charging and diagnostics." = "Live MagSafe pin layout for charging and diagnostics.";
+"Live multi-port power graphs and event history." = "Live multi-port power graphs and event history.";
+"MagSafe pin diagrams" = "MagSafe pin diagrams";
+"Manage Licence…" = "Manage Licence…";
+"See exactly what each link can do, and where the bottleneck is." = "See exactly what each link can do, and where the bottleneck is.";
+"Unlock deep diagnostics, live power graphs, and per-port history. One-off licence, no subscription." = "Unlock deep diagnostics, live power graphs, and per-port history. One-off licence, no subscription.";
