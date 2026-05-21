@@ -62,6 +62,11 @@ export default async function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy("src/screenshot*.webp");
   eleventyConfig.addPassthroughCopy("src/press");
 
+  // Decap CMS lives at /admin. Copy it verbatim (no Nunjucks pass), so the
+  // HTML/JS isn't accidentally parsed if it ever contains brace-heavy code.
+  eleventyConfig.ignores.add("src/admin/**");
+  eleventyConfig.addPassthroughCopy("src/admin");
+
   return {
     dir: {
       input: "src",
