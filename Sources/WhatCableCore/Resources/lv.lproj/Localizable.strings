@@ -34,6 +34,7 @@
 "Charging well at %lldW" = "Laba uzlāde ar %lld W";
 "Charging · %lldW charger" = "Uzlāde · %lld W lādētājs";
 "Charging: " = "Uzlāde: ";
+"Connected devices:" = "Pievienotās ierīces:";
 "Connected" = "Savienots";
 "Connected device: %@, %@" = "Savienotā ierīce: %1$@, %2$@";
 "Connected to %@" = "Savienots ar %@";

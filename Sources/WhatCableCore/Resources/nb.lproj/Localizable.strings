@@ -34,6 +34,7 @@
 "Charging well at %lldW" = "God lading med %lld W";
 "Charging · %lldW charger" = "Lading · %lld W-lader";
 "Charging: " = "Lading: ";
+"Connected devices:" = "Tilkoblede enheter:";
 "Connected" = "Tilkoblet";
 "Connected device: %@, %@" = "Tilkoblet enhet: %1$@, %2$@";
 "Connected to %@" = "Tilkoblet %@";

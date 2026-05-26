@@ -578,13 +578,16 @@ struct PortCard: View {
             }
 
             if !devices.isEmpty {
+                let tree = USBDeviceNode.flatten(USBDeviceNode.buildTree(from: devices))
                 VStack(alignment: .leading, spacing: 4) {
                     Text(String(localized: "Connected devices", bundle: _appLocalizedBundle))
                         .scaledFont(.caption).foregroundStyle(.secondary)
-                    ForEach(devices) { d in
-                        let name = d.productName ?? String(localized: "Unknown", bundle: _appLocalizedBundle)
-                        Text(verbatim: "• \(name) - \(d.speedLabel)")
+                    ForEach(tree) { node in
+                        let name = node.device.productName ?? String(localized: "Unknown", bundle: _appLocalizedBundle)
+                        let prefix = node.depth > 0 ? "\u{21B3} " : "\u{2022} "
+                        Text(verbatim: "\(prefix)\(name) - \(node.device.speedLabel)")
                             .scaledFont(.callout)
+                            .padding(.leading, CGFloat(node.depth) * 16)
                     }
                 }
                 .padding(.leading, 48)

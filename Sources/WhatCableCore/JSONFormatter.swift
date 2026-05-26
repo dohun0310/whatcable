@@ -98,6 +98,7 @@ private struct PortDTO: Codable {
     /// CIO cable capability from the Thunderbolt transport controller.
     /// Independent of the USB-PD e-marker. Nil when no TB link is active.
     let cio: CIOCableCapabilityDTO?
+    let devices: [USBDeviceDTO]?
     let rawProperties: [String: String]?
 
     init(
@@ -198,6 +199,9 @@ private struct PortDTO: Codable {
 
         self.trm = trmTransports.isEmpty ? nil : trmTransports.map { TRMTransportDTO(transport: $0) }
         self.cio = cioCapability.map { CIOCableCapabilityDTO(capability: $0) }
+
+        let tree = USBDeviceNode.buildTree(from: usbDevices)
+        self.devices = tree.isEmpty ? nil : tree.map { USBDeviceDTO(node: $0) }
 
         self.rawProperties = showRaw ? port.rawProperties : nil
     }
@@ -582,4 +586,24 @@ private struct AdapterDTO: Codable {
 private struct AdapterHVCEntryDTO: Codable {
     let voltageMV: Int
     let currentMA: Int
+}
+
+private struct USBDeviceDTO: Codable {
+    let name: String?
+    let vendorID: Int
+    let productID: Int
+    let vendorName: String?
+    let speed: String
+    let locationID: String
+    let children: [USBDeviceDTO]?
+
+    init(node: USBDeviceNode) {
+        self.name = node.device.productName
+        self.vendorID = Int(node.device.vendorID)
+        self.productID = Int(node.device.productID)
+        self.vendorName = node.device.vendorName
+        self.speed = node.device.speedLabel
+        self.locationID = String(format: "0x%08x", node.device.locationID)
+        self.children = node.children.isEmpty ? nil : node.children.map { USBDeviceDTO(node: $0) }
+    }
 }

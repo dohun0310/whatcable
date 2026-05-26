@@ -115,6 +115,17 @@ public enum TextFormatter {
             out += "  " + ANSI.wrap(ANSI.dim, dataDiag.detail) + "\n"
         }
 
+        if !usbDevices.isEmpty {
+            let tree = USBDeviceNode.flatten(USBDeviceNode.buildTree(from: usbDevices))
+            out += "\n" + ANSI.wrap(ANSI.bold, String(localized: "Connected devices:", bundle: _coreLocalizedBundle)) + "\n"
+            for node in tree {
+                let indent = String(repeating: "  ", count: node.depth + 1)
+                let name = node.device.productName ?? String(localized: "Unknown", bundle: _coreLocalizedBundle)
+                let prefix = node.depth > 0 ? "\u{21B3}" : ANSI.wrap(ANSI.gray, "\u{2022}")
+                out += "\(indent)\(prefix) \(name) - \(node.device.speedLabel)\n"
+            }
+        }
+
         // Cable trust signals: hedged flags raised against the e-marker.
         // Match the popover's behaviour: only render when at least one flag
         // fires, and use the same titles + details so wording stays

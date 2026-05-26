@@ -34,6 +34,7 @@
 "Charging well at %lldW" = "Լիցքավորվում է %lldW հզորությամբ";
 "Charging · %lldW charger" = "Լիցքավորում · %lldW լիցքավորիչ";
 "Charging: " = "Լիցքավորում՝";
+"Connected devices:" = "Միացված սարքեր՝";
 "Connected" = "Միացված է";
 "Connected device: %@, %@" = "Միացված սարք՝ %1$@, %2$@";
 "Connected to %@" = "Միացված է %@-ին";

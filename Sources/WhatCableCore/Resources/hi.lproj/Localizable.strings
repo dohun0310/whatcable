@@ -34,6 +34,7 @@
 "Charging well at %lldW" = "%lld W पर अच्छी चार्जिंग";
 "Charging · %lldW charger" = "चार्जिंग · %lld W चार्जर";
 "Charging: " = "चार्जिंग: ";
+"Connected devices:" = "कनेक्टेड डिवाइस:";
 "Connected" = "कनेक्टेड";
 "Connected device: %@, %@" = "कनेक्टेड डिवाइस: %1$@, %2$@";
 "Connected to %@" = "%@ से कनेक्टेड";

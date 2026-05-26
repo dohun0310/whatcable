@@ -34,6 +34,7 @@
 "Charging well at %lldW" = "Charging well at %lldW";
 "Charging · %lldW charger" = "Charging · %lldW charger";
 "Charging: " = "Charging: ";
+"Connected devices:" = "Connected devices:";
 "Connected" = "Connected";
 "Connected device: %@, %@" = "Connected device: %1$@, %2$@";
 "Connected to %@" = "Connected to %@";

@@ -34,6 +34,7 @@
 "Charging well at %lldW" = "Poprawne ładowanie z mocą %lldW";
 "Charging · %lldW charger" = "Ładowanie · ładowarka %lldW";
 "Charging: " = "Ładowanie: ";
+"Connected devices:" = "Podłączone urządzenia:";
 "Connected" = "Podłączony";
 "Connected device: %@, %@" = "Podłączone urządzenie: %1$@, %2$@";
 "Connected to %@" = "Podłączony do %@";

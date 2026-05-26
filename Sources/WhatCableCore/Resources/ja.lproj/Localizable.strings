@@ -34,6 +34,7 @@
 "Charging well at %lldW" = "%lld Wで良好に充電中";
 "Charging · %lldW charger" = "充電中 · %lld W充電器";
 "Charging: " = "充電: ";
+"Connected devices:" = "接続されたデバイス:";
 "Connected" = "接続済み";
 "Connected device: %@, %@" = "接続デバイス: %1$@、%2$@";
 "Connected to %@" = "%@に接続";

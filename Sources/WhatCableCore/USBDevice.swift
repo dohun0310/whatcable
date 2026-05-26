@@ -104,6 +104,18 @@ public struct USBDevice: Identifiable, Hashable {
         devices.first { $0.isRootDevice && ($0.speedRaw ?? 0) >= 3 }
     }
 
+    public static func parentLocationID(_ locID: UInt32) -> UInt32? {
+        let hubPath = locID & 0x00FF_FFFF
+        guard hubPath != 0 else { return nil }
+        for shift in stride(from: 0, to: 24, by: 4) {
+            if (hubPath >> shift) & 0xF != 0 {
+                let cleared = locID & ~(UInt32(0xF) << shift)
+                return (cleared & 0x00FF_FFFF) == 0 ? nil : cleared
+            }
+        }
+        return nil
+    }
+
     /// Highest-speed SuperSpeed device matched to this port by name
     /// (`controllerPortName`, sourced from IOKit's `UsbIOPort` mapping).
     /// Use only as a last-resort fallback when both `rootSuperSpeed(in:)`
@@ -119,5 +131,60 @@ public struct USBDevice: Identifiable, Hashable {
         devices
             .filter { $0.controllerPortName != nil && ($0.speedRaw ?? 0) >= 3 }
             .max { ($0.speedRaw ?? 0) < ($1.speedRaw ?? 0) }
+    }
+}
+
+// MARK: - Device tree
+
+public struct USBDeviceNode: Identifiable {
+    public let device: USBDevice
+    public let depth: Int
+    public let children: [USBDeviceNode]
+
+    public var id: UInt64 { device.id }
+
+    public static func buildTree(from devices: [USBDevice]) -> [USBDeviceNode] {
+        guard !devices.isEmpty else { return [] }
+
+        let byLocation = Dictionary(
+            devices.map { ($0.locationID, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+
+        var childrenOf: [UInt32: [USBDevice]] = [:]
+        var topLevel: [USBDevice] = []
+
+        for device in devices {
+            if device.locationID == 0 {
+                topLevel.append(device)
+                continue
+            }
+            if let parentLoc = USBDevice.parentLocationID(device.locationID),
+               byLocation[parentLoc] != nil {
+                childrenOf[parentLoc, default: []].append(device)
+            } else {
+                topLevel.append(device)
+            }
+        }
+
+        func build(_ device: USBDevice, depth: Int) -> USBDeviceNode {
+            let kids = (childrenOf[device.locationID] ?? [])
+                .sorted { $0.locationID < $1.locationID }
+                .map { build($0, depth: depth + 1) }
+            return USBDeviceNode(device: device, depth: depth, children: kids)
+        }
+
+        return topLevel
+            .sorted { $0.locationID < $1.locationID }
+            .map { build($0, depth: 0) }
+    }
+
+    public static func flatten(_ nodes: [USBDeviceNode]) -> [USBDeviceNode] {
+        var result: [USBDeviceNode] = []
+        for node in nodes {
+            result.append(node)
+            result.append(contentsOf: flatten(node.children))
+        }
+        return result
     }
 }
