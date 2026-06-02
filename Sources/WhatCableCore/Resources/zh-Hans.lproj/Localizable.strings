@@ -55,7 +55,6 @@
 "E-marker uses a reserved data-speed value" = "E-marker 使用了保留的数据速度值";
 "E-marker uses an invalid VDO version" = "E-marker 使用了无效的 VDO 版本";
 "E-marker uses an invalid cable-termination value" = "E-marker 使用了无效的线缆端接值";
-"Fingerprint shared across %@" = "指纹在%@之间共享";
 "Last leg drops from %@ to %@" = "最后一段从 %1$@ 降到 %2$@";
 "This cable's e-marker doesn't report a vendor ID, which is common on genuine cables. It's only worth a closer look if the cable's other capability data is also inconsistent." = "这条线缆的 e-marker 未报告厂商 ID，这在正品线缆上很常见。只有当线缆的其他能力数据也不一致时，才值得进一步检查。";
 "Linked at %@" = "链路速度 %@";

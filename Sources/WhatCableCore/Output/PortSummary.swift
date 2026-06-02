@@ -336,24 +336,19 @@ extension PortSummary {
         }
 
         // Cable e-marker vendor (SOP'): who made the cable.
+        //
+        // The VID gives the silicon vendor (honest, even when an unrelated
+        // retail brand is on the sleeve). A curated retail brand/model is
+        // only shown on a full VID+PID match: curatedCables ignores the Cable
+        // VDO (a capability spec shared across brands) and returns nothing
+        // unless both VID and PID are present. So a zeroed-identity cable
+        // shows no maker and no brand, just its capabilities. See #239.
         if let cable = cableEmarker, cable.vendorID != 0 {
             let vendor = VendorDB.label(for: cable.vendorID)
             bullets.append(String(localized: "Cable made by \(vendor)", bundle: _coreLocalizedBundle))
 
-            let vdo = cable.vdos.count > 3 ? cable.vdos[3] : 0
-            let matches = CableDB.curatedCables(vid: cable.vendorID, pid: cable.productID, cableVDO: vdo)
-            if matches.count > 1 {
-                let brands = Self.joinedBrands(matches)
-                bullets.append(String(localized: "Fingerprint shared across \(brands)", bundle: _coreLocalizedBundle))
-            }
-        } else if let cable = cableEmarker {
-            let vdo = cable.vdos.count > 3 ? cable.vdos[3] : 0
-            let matches = CableDB.curatedCables(vid: cable.vendorID, pid: cable.productID, cableVDO: vdo)
-            if matches.count == 1 {
-                bullets.append(String(localized: "Cable identified as \(matches[0].brand)", bundle: _coreLocalizedBundle))
-            } else if matches.count > 1 {
-                let brands = Self.joinedBrands(matches)
-                bullets.append(String(localized: "Fingerprint shared across \(brands)", bundle: _coreLocalizedBundle))
+            if let match = CableDB.curatedCables(vid: cable.vendorID, pid: cable.productID).first {
+                bullets.append(String(localized: "Cable identified as \(match.brand)", bundle: _coreLocalizedBundle))
             }
         }
 
@@ -493,15 +488,6 @@ extension PortSummary {
         }
 
         self.bullets = bullets
-    }
-
-    private static func joinedBrands(_ cables: [CuratedCable]) -> String {
-        var seen = Set<String>()
-        let names = cables.map(\.brand).filter { seen.insert($0).inserted }
-        if names.count <= 2 {
-            return names.joined(separator: " or ")
-        }
-        return names.dropLast().joined(separator: ", ") + ", or " + names.last!
     }
 }
 

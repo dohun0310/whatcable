@@ -55,7 +55,6 @@
 "E-marker uses a reserved data-speed value" = "e-markerが予約済みのデータ速度値を使用";
 "E-marker uses an invalid VDO version" = "e-markerが無効なVDOバージョンを使用";
 "E-marker uses an invalid cable-termination value" = "e-markerが無効なケーブル終端値を使用";
-"Fingerprint shared across %@" = "フィンガープリントは%@で共有されています";
 "Last leg drops from %@ to %@" = "最終区間で%1$@から%2$@に低下";
 "This cable's e-marker doesn't report a vendor ID, which is common on genuine cables. It's only worth a closer look if the cable's other capability data is also inconsistent." = "このケーブルのe-markerはベンダーIDを報告していませんが、これは正規のケーブルでもよくあることです。ケーブルのその他の能力データにも矛盾がある場合にのみ、詳しく確認する価値があります。";
 "Linked at %@" = "%@でリンク";

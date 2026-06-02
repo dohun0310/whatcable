@@ -94,6 +94,13 @@ func createSchema() {
         """)
 
     runSQL("CREATE INDEX idx_cables_fingerprint ON cables(vid, pid, cable_vdo)")
+
+    // Identity is (VID, PID) when both are present. Enforce one curated row
+    // per real identity so a cable can never resolve to two brands (the
+    // Cable VDO is capability, not identity; see #239). Zeroed or VID-only
+    // rows (vid==0 or pid==0) are not a real identity and legitimately repeat
+    // across distinct cables, so the uniqueness is partial.
+    runSQL("CREATE UNIQUE INDEX idx_cables_identity ON cables(vid, pid) WHERE vid != 0 AND pid != 0")
 }
 
 // MARK: - USB-IF vendor import
@@ -318,11 +325,15 @@ func importKnownCables() -> Int {
     }
     let sharedCount = fingerprintCounts.values.filter { $0 > 1 }.count
     if sharedCount > 0 {
-        print("note: \(sharedCount) fingerprint(s) shared by multiple rows (each row will be inserted separately)")
+        print("note: \(sharedCount) fingerprint(s) shared by multiple rows (duplicates of a real VID+PID identity are skipped below)")
     }
 
+    // INSERT OR IGNORE works with the partial unique index on (vid, pid): the
+    // first row for a real identity wins, later duplicates are skipped (they
+    // remain in the markdown for provenance). Zeroed / VID-only rows are not
+    // covered by the index, so they all insert.
     let insertSQL = """
-        INSERT INTO cables (vid, pid, cable_vdo, brand, speed, power, type, xid, issue_url)
+        INSERT OR IGNORE INTO cables (vid, pid, cable_vdo, brand, speed, power, type, xid, issue_url)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
     var stmt: OpaquePointer?
@@ -333,6 +344,7 @@ func importKnownCables() -> Int {
 
     runSQL("BEGIN TRANSACTION")
     var count = 0
+    var skippedDuplicate = 0
 
     for row in parsed {
         sqlite3_reset(stmt)
@@ -348,6 +360,12 @@ func importKnownCables() -> Int {
 
         if sqlite3_step(stmt) != SQLITE_DONE {
             fputs("warn: failed to insert cable VID=\(row.vid) PID=\(row.pid): \(String(cString: sqlite3_errmsg(db)))\n", stderr)
+        } else if sqlite3_changes(db) == 0 {
+            // Ignored by the partial unique index: this real (VID, PID)
+            // identity already has a curated row. First report wins.
+            skippedDuplicate += 1
+            let id = String(format: "0x%04X:0x%04X", row.vid, row.pid)
+            print("note: skipping duplicate cable \(id) '\(row.brand)' — identity already curated")
         } else {
             count += 1
         }
@@ -355,6 +373,9 @@ func importKnownCables() -> Int {
 
     runSQL("COMMIT")
     sqlite3_finalize(stmt)
+    if skippedDuplicate > 0 {
+        print("Skipped \(skippedDuplicate) duplicate VID+PID row(s); the markdown keeps them for provenance.")
+    }
     return count
 }
 

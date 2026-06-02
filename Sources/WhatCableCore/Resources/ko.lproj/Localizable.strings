@@ -55,7 +55,6 @@
 "E-marker uses a reserved data-speed value" = "e-marker가 예약된 데이터 속도 값을 사용함";
 "E-marker uses an invalid VDO version" = "e-marker가 유효하지 않은 VDO 버전을 사용함";
 "E-marker uses an invalid cable-termination value" = "e-marker가 유효하지 않은 케이블 종단 값을 사용함";
-"Fingerprint shared across %@" = "지문이 %@에서 공유됨";
 "Last leg drops from %@ to %@" = "마지막 구간이 %1$@에서 %2$@(으)로 떨어짐";
 "This cable's e-marker doesn't report a vendor ID, which is common on genuine cables. It's only worth a closer look if the cable's other capability data is also inconsistent." = "이 케이블의 e-marker가 제조사 ID를 보고하지 않지만, 이는 정품 케이블에서도 흔한 일입니다. 케이블의 다른 성능 데이터도 일관되지 않을 때에만 자세히 살펴볼 가치가 있습니다.";
 "Linked at %@" = "%@로 연결됨";

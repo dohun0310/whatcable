@@ -51,9 +51,15 @@ public enum CableReport {
             self.productID = identity.productID
             self.vendorIDHex = String(format: "0x%04X", identity.vendorID)
             self.productIDHex = String(format: "0x%04X", identity.productID)
-            let vdo = identity.vdos.count > 3 ? identity.vdos[3] : 0
-            let curated = CableDB.curatedCables(vid: identity.vendorID, pid: identity.productID, cableVDO: vdo)
-            self.vendorName = VendorDB.name(for: identity.vendorID) ?? curated.first?.brand ?? "Unregistered / unknown"
+            // On a confident identity match (VID + PID) prefer the curated
+            // brand/model, so a catalogued cable reads as e.g. "Anker 643"
+            // rather than just its silicon vendor. Fall back to the bundled
+            // vendor name (VendorDB.name delegates to CableDB.vendorName and
+            // adds the 0x0000 / 0xFFFF sentinel text), then to unknown. See #239.
+            let curated = CableDB.curatedCables(vid: identity.vendorID, pid: identity.productID)
+            self.vendorName = curated.first?.brand
+                ?? VendorDB.name(for: identity.vendorID)
+                ?? "Unregistered / unknown"
             self.vdos = identity.vdos
             if let cs = identity.certStatVDO, cs.isPresent {
                 self.usbifCertID = cs.xid

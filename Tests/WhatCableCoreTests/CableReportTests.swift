@@ -55,6 +55,18 @@ struct CableReportTests {
         #expect(payload.cable.vendorName == "Unregistered / unknown")
     }
 
+    @Test("Curated VID+PID match prefers the brand over the silicon vendor")
+    func curatedMatchPrefersBrand() {
+        // CalDigit TB5 cable (VID 0x01B6, PID 0x4003) is in the curated DB.
+        // On a confident VID+PID match the report surfaces the curated
+        // brand/model rather than only the silicon vendor name. See #239.
+        let curated = CableDB.curatedCables(vid: 0x01B6, pid: 0x4003)
+        #expect(!curated.isEmpty)
+        let payload = CableReport.payload(for: cableIdentity(vendorID: 0x01B6, productID: 0x4003))!
+        #expect(payload.cable.vendorName == curated.first?.brand)
+        #expect(payload.cable.vendorName.contains("CalDigit"))
+    }
+
     @Test("Markdown includes fingerprint and environment")
     func markdownIncludesFingerprintAndEnvironment() {
         let payload = CableReport.payload(for: cableIdentity(), appVersion: "1.2.3")!

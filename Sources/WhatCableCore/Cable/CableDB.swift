@@ -37,24 +37,28 @@ public enum CableDB {
         store.vendors[vid]?.source == "usbif"
     }
 
-    /// Look up known cables by e-marker fingerprint. Returns all
-    /// curated entries that share this (VID, PID, Cable VDO) tuple.
+    /// Look up known cables by identity: the (VID, PID) pair.
     ///
-    /// Multiple cables can share the same fingerprint when different
-    /// brand owners use the same ODM e-marker silicon (e.g. Baseus and
-    /// CUKTECH both ship cables with Shenzhen Injoinic VID 0x2E87).
-    /// The caller decides how to present single vs. shared matches.
+    /// Identity is the VID + PID only. The Cable VDO is deliberately NOT
+    /// part of the key: it encodes capability (speed / power / type), not
+    /// identity, and the same VDO is shared by unrelated brands (a generic
+    /// "USB 2.0 / 100 W" VDO appears across Anker, iottie, Statik, and many
+    /// more). Keying a brand/model match on it mislabels cables. See #239.
     ///
-    /// Returns an empty array for unknown fingerprints and for the
-    /// all-zero key (0, 0, 0), which carries no identifying bits.
-    /// See issue #161.
+    /// A cable missing either half of its identity cannot be pinned to a
+    /// brand, so a zero VID or zero PID returns an empty array. (A non-zero
+    /// VID with a zero PID still resolves the silicon vendor via VendorDB,
+    /// but never a curated retail brand.) The all-zero case (#161) is
+    /// covered by the same guard.
+    ///
+    /// Multiple entries can still share one (VID, PID) when the same product
+    /// was reported more than once; the caller decides how to present them.
     public static func curatedCables(
         vid: Int,
-        pid: Int,
-        cableVDO: UInt32
+        pid: Int
     ) -> [CuratedCable] {
-        if vid == 0 && pid == 0 && cableVDO == 0 { return [] }
-        return store.cables[CableKey(vid: vid, pid: pid, cableVDO: cableVDO)] ?? []
+        guard vid != 0, pid != 0 else { return [] }
+        return store.cables[CableKey(vid: vid, pid: pid)] ?? []
     }
 
     /// Number of vendor entries loaded. Exposed for tests.
@@ -84,7 +88,6 @@ public struct CuratedCable {
 private struct CableKey: Hashable {
     let vid: Int
     let pid: Int
-    let cableVDO: UInt32
 }
 
 private struct Store {
@@ -152,10 +155,12 @@ private struct Store {
         while sqlite3_step(stmt) == SQLITE_ROW {
             let vid = Int(sqlite3_column_int(stmt, 0))
             let pid = Int(sqlite3_column_int(stmt, 1))
-            let cableVDO = UInt32(bitPattern: sqlite3_column_int(stmt, 2))
+            // Column 2 (cable_vdo) is intentionally not read into the key:
+            // identity is (VID, PID) only. The column stays in the DB for the
+            // website catalog and reference. See #239.
             guard let brandPtr = sqlite3_column_text(stmt, 3) else { continue }
 
-            let key = CableKey(vid: vid, pid: pid, cableVDO: cableVDO)
+            let key = CableKey(vid: vid, pid: pid)
             map[key, default: []].append(CuratedCable(
                 brand: String(cString: brandPtr),
                 speed: sqlite3_column_text(stmt, 4).map { String(cString: $0) } ?? "",

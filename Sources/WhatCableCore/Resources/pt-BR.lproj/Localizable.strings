@@ -55,7 +55,6 @@
 "E-marker uses a reserved data-speed value" = "O e-marker usa um valor reservado de velocidade de dados";
 "E-marker uses an invalid VDO version" = "O e-marker usa uma versão de VDO inválida";
 "E-marker uses an invalid cable-termination value" = "O e-marker usa um valor inválido de terminação do cabo";
-"Fingerprint shared across %@" = "Impressão digital compartilhada entre %@";
 "Last leg drops from %@ to %@" = "O último trecho cai de %1$@ para %2$@";
 "This cable's e-marker doesn't report a vendor ID, which is common on genuine cables. It's only worth a closer look if the cable's other capability data is also inconsistent." = "O e-marker deste cabo não informa um ID de fabricante, o que é comum em cabos genuínos. Só vale uma análise mais detalhada se os demais dados de capacidade do cabo também estiverem inconsistentes.";
 "Linked at %@" = "Link em %@";
