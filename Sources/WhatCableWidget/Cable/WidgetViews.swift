@@ -255,11 +255,22 @@ extension WidgetSnapshot.PortEntry {
     }
 
     /// One-line display detail: "Studio Display · 5K 60Hz", or just the mode
-    /// when the monitor name is unknown. Nil when no display.
+    /// when the monitor name is unknown. Nil when no display. When a dock drives
+    /// more than one monitor through this port, a "+N" hint is appended for the
+    /// others, since the card has room for one line only (issue #271).
     var displayDetail: String? {
-        guard let mode = displayMode else { return monitorName }
-        if let name = monitorName, !name.isEmpty { return "\(name) · \(mode)" }
-        return mode
+        let base: String?
+        if let mode = displayMode {
+            if let name = monitorName, !name.isEmpty {
+                base = "\(name) · \(mode)"
+            } else {
+                base = mode
+            }
+        } else {
+            base = monitorName
+        }
+        guard let base, !base.isEmpty else { return nil }
+        return displayCount > 1 ? "\(base) +\(displayCount - 1)" : base
     }
 
     /// True when there's any pill to show.
@@ -442,45 +453,6 @@ struct LargeWidgetView: View {
             }
             Spacer(minLength: 0)
         }
-    }
-}
-
-// MARK: - Power sparkline
-
-struct PowerSparkline: View {
-    let samples: [Double]
-    var color: Color = .yellow
-
-    var body: some View {
-        GeometryReader { geo in
-            let path = sparklinePath(in: geo.size)
-            ZStack {
-                path.stroke(color, lineWidth: 1.4)
-                path.fill(color.opacity(0.15))
-            }
-        }
-    }
-
-    private func sparklinePath(in size: CGSize) -> Path {
-        var path = Path()
-        guard samples.count >= 2, size.width > 0, size.height > 0 else { return path }
-        let minV = samples.min() ?? 0
-        let maxV = samples.max() ?? 1
-        let range = max(maxV - minV, 0.5)
-        let stepX = size.width / CGFloat(samples.count - 1)
-        let points: [CGPoint] = samples.enumerated().map { idx, value in
-            let normalized = (value - minV) / range
-            let y = size.height - CGFloat(normalized) * size.height
-            return CGPoint(x: CGFloat(idx) * stepX, y: y)
-        }
-        path.move(to: CGPoint(x: 0, y: size.height))
-        path.addLine(to: points[0])
-        for point in points.dropFirst() {
-            path.addLine(to: point)
-        }
-        path.addLine(to: CGPoint(x: size.width, y: size.height))
-        path.closeSubpath()
-        return path
     }
 }
 
